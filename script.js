@@ -2,8 +2,8 @@
 const { Engine, Render, Runner, Bodies, World, Mouse, MouseConstraint, Events, Body } = Matter;
 
 // Supabase configuration
-const supabaseUrl = 'https://your-project.supabase.co'; // Replace with actual URL
-const supabaseKey = 'your-anon-key'; // Replace with actual anon key
+const supabaseUrl = 'https://svjcokhvmzivbmecjgoc.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2amNva2h2bXppdmJtZWNqZ29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk2NzAwNjIsImV4cCI6MjA2NTI0NjA2Mn0.pBE8xYDAzPPxT7v31H0Cp419tq3xuRZSdJ4B7JVZX0g';
 let supabaseClient = null;
 
 // Initialize Supabase client if available
