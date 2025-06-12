@@ -4,7 +4,16 @@ const { Engine, Render, Runner, Bodies, World, Mouse, MouseConstraint, Events } 
 // Supabase configuration
 const supabaseUrl = 'https://your-project.supabase.co'; // Replace with actual URL
 const supabaseKey = 'your-anon-key'; // Replace with actual anon key
-const supabase = supabase?.createClient ? supabase.createClient(supabaseUrl, supabaseKey) : null;
+let supabaseClient = null;
+
+// Initialize Supabase client if available
+if (typeof supabase !== 'undefined' && supabase.createClient) {
+    try {
+        supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    } catch (error) {
+        console.log('Supabase not configured properly:', error);
+    }
+}
 
 // Game variables
 let engine, render, runner, world;
@@ -303,13 +312,13 @@ function calculateTowerHeight() {
 }
 
 async function saveScore(name, score) {
-    if (!supabase) {
+    if (!supabaseClient) {
         console.log('Supabase not configured, score not saved:', { name, score });
         return;
     }
     
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('resultater')
             .insert([{ name: name, score: score }]);
         
