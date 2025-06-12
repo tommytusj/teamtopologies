@@ -19,7 +19,7 @@ if (typeof supabase !== 'undefined' && supabase.createClient) {
 let engine, render, runner, world;
 let blocks = [];
 let trapBlocks = [];
-let countdown = 20;
+let countdown = 12;
 let gameActive = false;
 let timerInterval;
 let platform;
@@ -37,48 +37,48 @@ const finalHeight = document.getElementById('finalHeight');
 const teamTypes = [
     {
         name: 'Plattform',
-        width: 160,
-        height: 40,
+        width: 100,
+        height: 25,
         color: '#9FC5E8',
-        count: 2,
+        count: 3,
         isTrap: false
     },
     {
         name: 'Verdistrøm',
-        width: 80,
-        height: 80,
+        width: 50,
+        height: 50,
         color: '#F8D568',
-        count: 2,
+        count: 3,
         isTrap: false
     },
     {
         name: 'Enabling',
-        width: 80,
-        height: 120,
+        width: 50,
+        height: 75,
         color: '#D5A6BD',
-        count: 2,
+        count: 3,
         isTrap: false
     },
     {
         name: 'Subsystem',
-        width: 60,
-        height: 60,
+        width: 40,
+        height: 40,
         color: '#F6B26B',
-        count: 2,
+        count: 3,
         isTrap: false
     },
     {
         name: 'Database',
-        width: 100,
-        height: 100,
+        width: 60,
+        height: 60,
         color: '#cccccc',
         count: 2,
         isTrap: true
     },
     {
         name: 'Portefølje',
-        width: 100,
-        height: 100,
+        width: 60,
+        height: 60,
         color: '#b6d7a8',
         count: 2,
         isTrap: true
@@ -133,23 +133,23 @@ function resetGame() {
     // Reset variables
     blocks = [];
     trapBlocks = [];
-    countdown = 20;
+    countdown = 12;
     gameActive = false;
     
     // Reset UI
     startBtn.disabled = false;
     nameInput.disabled = false;
     nameInput.value = '';
-    timeDisplay.textContent = '20';
+    timeDisplay.textContent = '12';
     heightDisplay.textContent = '0';
     resultDiv.style.display = 'none';
     resetBtn.style.display = 'none';
 }
 
 function initGame() {
-    // Create engine with lower gravity
+    // Create engine with slightly higher gravity for more realistic physics
     engine = Engine.create();
-    engine.world.gravity.y = 0.5;
+    engine.world.gravity.y = 0.8;
     world = engine.world;
     
     // Create renderer
@@ -161,7 +161,7 @@ function initGame() {
             width: window.innerWidth,
             height: window.innerHeight,
             wireframes: false,
-            background: '#87CEEB',
+            background: '#ffffff',
             showVelocity: false,
             showAngleIndicator: false,
             showDebug: false
@@ -185,7 +185,7 @@ function initGame() {
     });
     
     // Create platform (TINE logo placeholder)
-    platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, 200, 20, {
+    platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, 400, 20, {
         isStatic: true,
         render: { fillStyle: '#666' }
     });
@@ -248,10 +248,10 @@ function createTeamBlocks() {
                 teamType.width,
                 teamType.height,
                 {
-                    restitution: 0, // No bouncing
-                    friction: 0.8, // High friction
-                    frictionStatic: 0.9,
-                    inertia: Infinity, // Prevents rotation when dragged
+                    restitution: 0.1, // Small bounce
+                    friction: 0.4, // Lower friction for instability  
+                    frictionStatic: 0.6,
+                    // Removed inertia: Infinity to allow rotation
                     render: {
                         fillStyle: teamType.color,
                         strokeStyle: '#333',
@@ -274,7 +274,7 @@ function createTeamBlocks() {
             
             World.add(world, block);
         }
-        xOffset += teamType.width + 30;
+        xOffset += teamType.width + 15;
     });
 }
 

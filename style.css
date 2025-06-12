@@ -6,7 +6,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #ffffff;
     overflow: hidden;
     height: 100vh;
     position: relative;
@@ -14,7 +14,7 @@ body {
 
 #world {
     display: block;
-    background-color: #87CEEB;
+    background-color: #ffffff;
     cursor: grab;
 }
 
@@ -123,16 +123,16 @@ button:disabled {
 /* Mobile responsiveness */
 @media (max-width: 768px) {
     #hud {
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        padding: 10px;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        padding: 6px;
     }
     
     .hud-top {
         flex-direction: column;
         align-items: stretch;
-        gap: 10px;
+        gap: 4px;
     }
     
     .input-section {
@@ -141,33 +141,37 @@ button:disabled {
     
     .game-info {
         justify-content: center;
-        gap: 15px;
+        gap: 10px;
+        font-size: 14px;
     }
     
     #nameInput {
         min-width: 120px;
         font-size: 16px; /* Prevents zoom on iOS */
+        padding: 6px 8px;
     }
     
     button {
         font-size: 16px; /* Prevents zoom on iOS */
-        padding: 10px 16px;
+        padding: 6px 12px;
     }
 }
 
 @media (max-width: 480px) {
     .input-section {
         flex-direction: column;
+        gap: 4px;
     }
     
     .game-info {
-        flex-direction: column;
-        gap: 5px;
+        flex-direction: row;
+        gap: 8px;
+        font-size: 12px;
     }
     
     #nameInput {
         width: 100%;
-        margin-bottom: 5px;
+        margin-bottom: 2px;
     }
 }
 
