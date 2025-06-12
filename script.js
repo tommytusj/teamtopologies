@@ -1,5 +1,5 @@
 // Matter.js modules
-const { Engine, Render, Runner, Bodies, World, Mouse, MouseConstraint, Events } = Matter;
+const { Engine, Render, Runner, Bodies, World, Mouse, MouseConstraint, Events, Body } = Matter;
 
 // Supabase configuration
 const supabaseUrl = 'https://your-project.supabase.co'; // Replace with actual URL
@@ -18,6 +18,7 @@ if (typeof supabase !== 'undefined' && supabase.createClient) {
 // Game variables
 let engine, render, runner, world;
 let blocks = [];
+let trapBlocks = [];
 let countdown = 20;
 let gameActive = false;
 let timerInterval;
@@ -39,28 +40,48 @@ const teamTypes = [
         width: 160,
         height: 40,
         color: '#9FC5E8',
-        count: 2
+        count: 2,
+        isTrap: false
     },
     {
         name: 'Verdistrøm',
         width: 80,
         height: 80,
         color: '#F8D568',
-        count: 2
+        count: 2,
+        isTrap: false
     },
     {
         name: 'Enabling',
         width: 80,
         height: 120,
         color: '#D5A6BD',
-        count: 2
+        count: 2,
+        isTrap: false
     },
     {
         name: 'Subsystem',
         width: 60,
         height: 60,
         color: '#F6B26B',
-        count: 2
+        count: 2,
+        isTrap: false
+    },
+    {
+        name: 'Database',
+        width: 100,
+        height: 100,
+        color: '#cccccc',
+        count: 2,
+        isTrap: true
+    },
+    {
+        name: 'Portefølje',
+        width: 100,
+        height: 100,
+        color: '#b6d7a8',
+        count: 2,
+        isTrap: true
     }
 ];
 
@@ -111,6 +132,7 @@ function resetGame() {
     
     // Reset variables
     blocks = [];
+    trapBlocks = [];
     countdown = 20;
     gameActive = false;
     
@@ -217,9 +239,12 @@ function createTeamBlocks() {
     
     teamTypes.forEach(teamType => {
         for (let i = 0; i < teamType.count; i++) {
+            const blockX = xOffset;
+            const blockY = baseY - (i * (teamType.height + 10));
+            
             const block = Bodies.rectangle(
-                xOffset,
-                baseY - (i * (teamType.height + 10)),
+                blockX,
+                blockY,
                 teamType.width,
                 teamType.height,
                 {
@@ -237,7 +262,16 @@ function createTeamBlocks() {
             
             // Add team type info to the block
             block.teamType = teamType.name;
+            block.isTrap = teamType.isTrap || false;
+            block.initialPosition = { x: blockX, y: blockY };
+            
             blocks.push(block);
+            
+            // Keep track of trap blocks separately
+            if (block.isTrap) {
+                trapBlocks.push(block);
+            }
+            
             World.add(world, block);
         }
         xOffset += teamType.width + 30;
@@ -281,10 +315,80 @@ function startTimer() {
     }, 1000);
 }
 
+function checkTrapBlocksUsed() {
+    // Check if any trap block has been moved significantly from its initial position
+    const moveThreshold = 50; // pixels
+    
+    return trapBlocks.some(block => {
+        const distanceX = Math.abs(block.position.x - block.initialPosition.x);
+        const distanceY = Math.abs(block.position.y - block.initialPosition.y);
+        return distanceX > moveThreshold || distanceY > moveThreshold;
+    });
+}
+
+function triggerChaosExplosion() {
+    // Create explosive forces on all trap blocks that have been moved
+    trapBlocks.forEach(block => {
+        const distanceX = Math.abs(block.position.x - block.initialPosition.x);
+        const distanceY = Math.abs(block.position.y - block.initialPosition.y);
+        
+        if (distanceX > 50 || distanceY > 50) {
+            // Apply random explosive force
+            const explosionForce = 0.3;
+            const randomX = (Math.random() - 0.5) * explosionForce;
+            const randomY = (Math.random() - 0.5) * explosionForce;
+            
+            Body.applyForce(block, block.position, {
+                x: randomX,
+                y: randomY
+            });
+            
+            // Also affect nearby blocks
+            blocks.forEach(otherBlock => {
+                if (otherBlock !== block) {
+                    const distance = Math.sqrt(
+                        Math.pow(block.position.x - otherBlock.position.x, 2) +
+                        Math.pow(block.position.y - otherBlock.position.y, 2)
+                    );
+                    
+                    if (distance < 200) { // Within explosion radius
+                        const forceMultiplier = (200 - distance) / 200 * 0.2;
+                        const directionX = (otherBlock.position.x - block.position.x) / distance;
+                        const directionY = (otherBlock.position.y - block.position.y) / distance;
+                        
+                        Body.applyForce(otherBlock, otherBlock.position, {
+                            x: directionX * forceMultiplier,
+                            y: directionY * forceMultiplier
+                        });
+                    }
+                }
+            });
+        }
+    });
+}
+
 function endGame() {
     gameActive = false;
     clearInterval(timerInterval);
     
+    // Check if trap blocks were used and trigger chaos if so
+    const trapBlocksUsed = checkTrapBlocksUsed();
+    
+    if (trapBlocksUsed) {
+        // Trigger chaos explosion
+        triggerChaosExplosion();
+        
+        // Wait a moment for chaos to settle before calculating height
+        setTimeout(() => {
+            calculateAndShowResults();
+        }, 2000); // 2 second delay for chaos
+    } else {
+        // No trap blocks used, calculate immediately
+        calculateAndShowResults();
+    }
+}
+
+function calculateAndShowResults() {
     // Calculate tower height
     const towerHeight = calculateTowerHeight();
     heightDisplay.textContent = towerHeight;
