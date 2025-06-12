@@ -1,1 +1,35 @@
-code goes here
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Topologies Tower</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="hud">
+        <div class="hud-top">
+            <div class="input-section">
+                <input type="text" id="nameInput" placeholder="Skriv inn ditt navn" maxlength="50">
+                <button id="startBtn">Start spill</button>
+            </div>
+            <div class="game-info">
+                <div class="timer">Tid: <span id="timeDisplay">20</span>s</div>
+                <div class="height">Høyde: <span id="heightDisplay">0</span>px</div>
+            </div>
+        </div>
+        <button id="resetBtn" style="display: none;">Start på nytt</button>
+        <div id="result" style="display: none;">
+            <h3>Spill ferdig!</h3>
+            <p>Tårnhøyde: <span id="finalHeight">0</span>px</p>
+            <p>Resultat lagret!</p>
+        </div>
+    </div>
+    
+    <canvas id="world"></canvas>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>

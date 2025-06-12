@@ -1,0 +1,179 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    overflow: hidden;
+    height: 100vh;
+    position: relative;
+}
+
+#world {
+    display: block;
+    background-color: #87CEEB;
+    cursor: grab;
+}
+
+#world:active {
+    cursor: grabbing;
+}
+
+#hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.input-section {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#nameInput {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 150px;
+}
+
+#nameInput:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.game-info {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    font-weight: bold;
+}
+
+.timer {
+    color: #FF6B6B;
+}
+
+.height {
+    color: #4ECDC4;
+}
+
+#resetBtn {
+    margin-top: 10px;
+    background-color: #FF6B6B;
+}
+
+#resetBtn:hover {
+    background-color: #FF5252;
+}
+
+#result {
+    text-align: center;
+    margin-top: 10px;
+    padding: 15px;
+    background-color: #E8F5E8;
+    border-radius: 6px;
+    border: 2px solid #4CAF50;
+}
+
+#result h3 {
+    color: #2E7D32;
+    margin-bottom: 10px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    #hud {
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        padding: 10px;
+    }
+    
+    .hud-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .input-section {
+        justify-content: center;
+    }
+    
+    .game-info {
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    #nameInput {
+        min-width: 120px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    button {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 10px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .input-section {
+        flex-direction: column;
+    }
+    
+    .game-info {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    #nameInput {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
+/* Touch-friendly sizing */
+@media (hover: none) and (pointer: coarse) {
+    button, #nameInput {
+        min-height: 44px; /* iOS recommended touch target size */
+    }
+}
