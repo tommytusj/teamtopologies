@@ -288,7 +288,7 @@ function drawLabels() {
             
             context.save();
             context.fillStyle = '#000';
-            context.font = 'bold 12px Arial';
+            context.font = 'bold 10px Arial';
             context.textAlign = 'center';
             context.textBaseline = 'middle';
             
