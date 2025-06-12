@@ -147,9 +147,9 @@ function resetGame() {
 }
 
 function initGame() {
-    // Create engine with slightly higher gravity for more realistic physics
+    // Create engine with higher gravity for more realistic and unstable physics
     engine = Engine.create();
-    engine.world.gravity.y = 0.8;
+    engine.world.gravity.y = 1.0; // Increased from 0.8 for more instability
     world = engine.world;
     
     // Create renderer
@@ -171,6 +171,7 @@ function initGame() {
     // Create boundaries
     const ground = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 10, window.innerWidth, 20, {
         isStatic: true,
+        friction: 0.8, // Higher friction for ground to provide contrast
         render: { fillStyle: '#8B4513' }
     });
     
@@ -187,6 +188,7 @@ function initGame() {
     // Create platform (TINE logo placeholder)
     platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, 400, 20, {
         isStatic: true,
+        friction: 0.6, // Medium friction on platform - not too grippy
         render: { fillStyle: '#666' }
     });
     
@@ -230,6 +232,30 @@ function initGame() {
     // Add event for rendering labels
     Events.on(render, 'afterRender', drawLabels);
     
+    // Add collision event to create instability when blocks land on each other
+    Events.on(engine, 'collisionStart', function(event) {
+        event.pairs.forEach(function(pair) {
+            const { bodyA, bodyB } = pair;
+            
+            // Skip if either body is static (ground, walls, platform)
+            if (bodyA.isStatic || bodyB.isStatic) return;
+            
+            // Add small random forces to create instability when blocks collide
+            const perturbationForce = 0.002;
+            const randomX = (Math.random() - 0.5) * perturbationForce;
+            const randomY = (Math.random() - 0.5) * perturbationForce * 0.5; // Less vertical randomness
+            
+            // Apply small force to both bodies to create realistic instability
+            Body.applyForce(bodyA, bodyA.position, { x: randomX, y: randomY });
+            Body.applyForce(bodyB, bodyB.position, { x: -randomX, y: randomY });
+            
+            // Add small angular velocity to encourage tipping
+            const angularPerturbation = (Math.random() - 0.5) * 0.01;
+            Body.setAngularVelocity(bodyA, bodyA.angularVelocity + angularPerturbation);
+            Body.setAngularVelocity(bodyB, bodyB.angularVelocity - angularPerturbation);
+        });
+    });
+    
     gameActive = true;
 }
 
@@ -248,10 +274,12 @@ function createTeamBlocks() {
                 teamType.width,
                 teamType.height,
                 {
-                    restitution: 0.1, // Small bounce
-                    friction: 0.4, // Lower friction for instability  
-                    frictionStatic: 0.6,
-                    // Removed inertia: Infinity to allow rotation
+                    restitution: 0.2, // Increased bounce for more dynamic interactions
+                    friction: 0.2, // Much lower friction - blocks slip easily
+                    frictionStatic: 0.3, // Lower static friction - easier to start sliding
+                    frictionAir: 0.01, // Air resistance for more realistic motion
+                    density: 0.001, // Lower density for easier tipping
+                    // Removed inertia: Infinity to allow rotation and tipping
                     render: {
                         fillStyle: teamType.color,
                         strokeStyle: '#333',
