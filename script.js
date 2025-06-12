@@ -333,8 +333,11 @@ function triggerChaosExplosion() {
         const distanceY = Math.abs(block.position.y - block.initialPosition.y);
         
         if (distanceX > 50 || distanceY > 50) {
-            // Apply random explosive force
-            const explosionForce = 0.3;
+            // Visual feedback: make trap block flash red
+            block.render.fillStyle = '#FF0000';
+            
+            // Apply stronger explosive force to the trap block itself
+            const explosionForce = 0.5;
             const randomX = (Math.random() - 0.5) * explosionForce;
             const randomY = (Math.random() - 0.5) * explosionForce;
             
@@ -343,7 +346,7 @@ function triggerChaosExplosion() {
                 y: randomY
             });
             
-            // Also affect nearby blocks
+            // Also affect nearby blocks with stronger force
             blocks.forEach(otherBlock => {
                 if (otherBlock !== block) {
                     const distance = Math.sqrt(
@@ -351,14 +354,14 @@ function triggerChaosExplosion() {
                         Math.pow(block.position.y - otherBlock.position.y, 2)
                     );
                     
-                    if (distance < 200) { // Within explosion radius
-                        const forceMultiplier = (200 - distance) / 200 * 0.2;
+                    if (distance < 150) { // Smaller radius but stronger force
+                        const forceMultiplier = (150 - distance) / 150 * 0.4;
                         const directionX = (otherBlock.position.x - block.position.x) / distance;
                         const directionY = (otherBlock.position.y - block.position.y) / distance;
                         
                         Body.applyForce(otherBlock, otherBlock.position, {
                             x: directionX * forceMultiplier,
-                            y: directionY * forceMultiplier
+                            y: directionY * forceMultiplier - 0.1 // Add slight upward force
                         });
                     }
                 }
@@ -402,17 +405,31 @@ function calculateAndShowResults() {
 }
 
 function calculateTowerHeight() {
-    const platformTop = platform.position.y - 10; // Platform surface
-    let highestPoint = platformTop;
+    // Count blocks that are still on or near the platform
+    const platformLeft = platform.position.x - 200; // Platform width is 400
+    const platformRight = platform.position.x + 200;
+    const platformTop = platform.position.y - 10;
+    
+    let blocksOnPlatform = 0;
+    let totalHeight = 0;
     
     blocks.forEach(block => {
-        const blockTop = block.bounds.min.y;
-        if (blockTop < highestPoint) {
-            highestPoint = blockTop;
+        // Check if block is still on or above the platform
+        const blockCenterX = block.position.x;
+        const blockBottom = block.bounds.max.y;
+        
+        if (blockCenterX >= platformLeft && blockCenterX <= platformRight && 
+            blockBottom <= platformTop + 200) { // Allow some height above platform
+            blocksOnPlatform++;
+            const blockTop = block.bounds.min.y;
+            if (blockTop < platformTop) {
+                totalHeight += platformTop - blockTop;
+            }
         }
     });
     
-    return Math.max(0, Math.round(platformTop - highestPoint));
+    // Score combines blocks on platform (major factor) and height (minor factor)
+    return blocksOnPlatform * 50 + Math.round(totalHeight / 10);
 }
 
 async function saveScore(name, score) {
