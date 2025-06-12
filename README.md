@@ -1,6 +1,6 @@
 # Team Topologies Tower
 
-Et nettleserbasert fysikkspill inspirert av Team Topologies og Jenga. Spilleren drar og stabler blokkformer som representerer ulike teamtyper innenfor et gitt tidsspill, og poeng gis ut fra høyden av det stabile tårnet.
+Et nettleserbasert fysikkspill inspirert av Team Topologies og Jenga. Spilleren drar og stabler blokkformer som representerer ulike teamtyper innenfor et gitt tidsspill, og poeng gis ut fra høyden av det stabile tårnet. Pass på felle-blokkene - de kan forårsake kaos hvis de brukes!
 
 ## Hvordan spille
 
@@ -11,12 +11,24 @@ Et nettleserbasert fysikkspill inspirert av Team Topologies og Jenga. Spilleren 
 5. Bygg tårnet så høyt som mulig innen 20 sekunder
 6. Når tiden går ut, måles høyden av tårnet og resultatet lagres
 
+### Spillstrategi
+- **Normale blokker**: Kan brukes trygt til å bygge tårnet
+- **Felle-blokker**: Unngå å flytte Database- og Portefølje-blokkene for langt fra sin opprinnelige posisjon
+- **Kaos-eksplosjon**: Hvis felle-blokker flyttes mer enn 50px, utløses en eksplosjon som kan ødelegge tårnet før måling
+
 ## Team-typer og blokker
 
+### Normale team-blokker
 - **Plattform-team**: Brede, lave blokker (160×40px) i blå farge
 - **Stream-aligned team (Verdistrøm)**: Firkantede blokker (80×80px) i gul farge  
 - **Enabling team**: Høye, smale blokker (80×120px) i rosa farge
 - **Complicated Subsystem team**: Små firkanter (60×60px) i oransje farge
+
+### Felle-blokker (Trap blocks)
+- **Database**: Store grå blokker (100×100px) - forårsaker kaos hvis brukt
+- **Portefølje**: Store grønne blokker (100×100px) - forårsaker kaos hvis brukt
+
+**Viktig**: Hvis felle-blokker flyttes mer enn 50 piksler fra sin opprinnelige posisjon, vil de utløse en kaos-eksplosjon når tiden går ut. Eksplosjonen påvirker nærliggende blokker og kan ødelegge tårnet før høydemålingen!
 
 ## Tekniske detaljer
 
