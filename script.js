@@ -98,6 +98,15 @@ const teamTypes = [
         color: '#c9daf8',
         count: 2,
         isTrap: true
+    },
+    {
+        name: 'Test',
+        radius: 30,
+        color: '#000000',
+        textColor: '#ffffff',
+        count: 1,
+        isTrap: true,
+        isRound: true
     }
 ];
 
@@ -285,31 +294,55 @@ function createTeamBlocks() {
     teamTypes.forEach(teamType => {
         for (let i = 0; i < teamType.count; i++) {
             const blockX = xOffset;
-            const blockY = baseY - (i * (teamType.height + 10));
+            const blockHeight = teamType.isRound ? teamType.radius * 2 : teamType.height;
+            const blockY = baseY - (i * (blockHeight + 10));
             
-            const block = Bodies.rectangle(
-                blockX,
-                blockY,
-                teamType.width,
-                teamType.height,
-                {
-                    restitution: 0.2, // Increased bounce for more dynamic interactions
-                    friction: 0.2, // Much lower friction - blocks slip easily
-                    frictionStatic: 0.3, // Lower static friction - easier to start sliding
-                    frictionAir: 0.01, // Air resistance for more realistic motion
-                    density: 0.001, // Lower density for easier tipping
-                    // Removed inertia: Infinity to allow rotation and tipping
-                    render: {
-                        fillStyle: teamType.color,
-                        strokeStyle: '#333',
-                        lineWidth: 2
+            let block;
+            if (teamType.isRound) {
+                block = Bodies.circle(
+                    blockX,
+                    blockY,
+                    teamType.radius,
+                    {
+                        restitution: 0.2, // Increased bounce for more dynamic interactions
+                        friction: 0.2, // Much lower friction - blocks slip easily
+                        frictionStatic: 0.3, // Lower static friction - easier to start sliding
+                        frictionAir: 0.01, // Air resistance for more realistic motion
+                        density: 0.001, // Lower density for easier tipping
+                        render: {
+                            fillStyle: teamType.color,
+                            strokeStyle: '#333',
+                            lineWidth: 2
+                        }
                     }
-                }
-            );
+                );
+            } else {
+                block = Bodies.rectangle(
+                    blockX,
+                    blockY,
+                    teamType.width,
+                    teamType.height,
+                    {
+                        restitution: 0.2, // Increased bounce for more dynamic interactions
+                        friction: 0.2, // Much lower friction - blocks slip easily
+                        frictionStatic: 0.3, // Lower static friction - easier to start sliding
+                        frictionAir: 0.01, // Air resistance for more realistic motion
+                        density: 0.001, // Lower density for easier tipping
+                        // Removed inertia: Infinity to allow rotation and tipping
+                        render: {
+                            fillStyle: teamType.color,
+                            strokeStyle: '#333',
+                            lineWidth: 2
+                        }
+                    }
+                );
+            }
             
             // Add team type info to the block
             block.teamType = teamType.name;
             block.isTrap = teamType.isTrap || false;
+            block.isRound = teamType.isRound || false;
+            block.textColor = teamType.textColor || '#000';
             block.initialPosition = { x: blockX, y: blockY };
             
             blocks.push(block);
@@ -317,35 +350,43 @@ function createTeamBlocks() {
             // Keep track of trap blocks separately
             if (block.isTrap) {
                 trapBlocks.push(block);
-                // Collect first two trap blocks to place on platform
-                if (trapBlocksToPlace.length < 2) {
+                // Collect first three trap blocks to place on platform
+                if (trapBlocksToPlace.length < 3) {
                     trapBlocksToPlace.push(block);
                 }
             }
             
             World.add(world, block);
         }
-        xOffset += teamType.width + 15;
+        const blockWidth = teamType.isRound ? teamType.radius * 2 : teamType.width;
+        xOffset += blockWidth + 15;
     });
     
-    // Place two trap blocks on the platform
-    if (trapBlocksToPlace.length >= 2) {
+    // Place three trap blocks on the platform
+    if (trapBlocksToPlace.length >= 3) {
         const platformX = window.innerWidth / 2;
         const platformY = window.innerHeight - 80;
         
-        // Position first trap block on platform
+        // Position first trap block on platform (left)
         Body.setPosition(trapBlocksToPlace[0], {
-            x: platformX - 40,
+            x: platformX - 60,
             y: platformY - 40
         });
-        trapBlocksToPlace[0].initialPosition = { x: platformX - 40, y: platformY - 40 };
+        trapBlocksToPlace[0].initialPosition = { x: platformX - 60, y: platformY - 40 };
         
-        // Position second trap block on top of first
+        // Position second trap block on platform (right)
         Body.setPosition(trapBlocksToPlace[1], {
-            x: platformX + 40,
+            x: platformX + 60,
             y: platformY - 40
         });
-        trapBlocksToPlace[1].initialPosition = { x: platformX + 40, y: platformY - 40 };
+        trapBlocksToPlace[1].initialPosition = { x: platformX + 60, y: platformY - 40 };
+        
+        // Position third trap block on platform (center - the round "Test" block)
+        Body.setPosition(trapBlocksToPlace[2], {
+            x: platformX,
+            y: platformY - 40
+        });
+        trapBlocksToPlace[2].initialPosition = { x: platformX, y: platformY - 40 };
     }
 }
 
@@ -358,7 +399,7 @@ function drawLabels() {
             const bounds = block.bounds;
             
             context.save();
-            context.fillStyle = '#000';
+            context.fillStyle = block.textColor || '#000';
             context.font = 'bold 10px Arial';
             context.textAlign = 'center';
             context.textBaseline = 'middle';
