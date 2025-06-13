@@ -387,58 +387,43 @@ function startTimer() {
     }, 1000);
 }
 
-function checkTrapBlocksUsed() {
-    // Check if any trap block has been moved significantly from its initial position
-    const moveThreshold = 50; // pixels
-    
-    return trapBlocks.some(block => {
-        const distanceX = Math.abs(block.position.x - block.initialPosition.x);
-        const distanceY = Math.abs(block.position.y - block.initialPosition.y);
-        return distanceX > moveThreshold || distanceY > moveThreshold;
-    });
-}
 
 function triggerChaosExplosion() {
-    // Create explosive forces on all trap blocks that have been moved
+    // Create explosive forces on ALL trap blocks
     trapBlocks.forEach(block => {
-        const distanceX = Math.abs(block.position.x - block.initialPosition.x);
-        const distanceY = Math.abs(block.position.y - block.initialPosition.y);
+        // Visual feedback: make trap block flash red
+        block.render.fillStyle = '#FF0000';
         
-        if (distanceX > 50 || distanceY > 50) {
-            // Visual feedback: make trap block flash red
-            block.render.fillStyle = '#FF0000';
-            
-            // Apply stronger explosive force to the trap block itself
-            const explosionForce = 0.5;
-            const randomX = (Math.random() - 0.5) * explosionForce;
-            const randomY = (Math.random() - 0.5) * explosionForce;
-            
-            Body.applyForce(block, block.position, {
-                x: randomX,
-                y: randomY
-            });
-            
-            // Also affect nearby blocks with stronger force
-            blocks.forEach(otherBlock => {
-                if (otherBlock !== block) {
-                    const distance = Math.sqrt(
-                        Math.pow(block.position.x - otherBlock.position.x, 2) +
-                        Math.pow(block.position.y - otherBlock.position.y, 2)
-                    );
+        // Apply stronger explosive force to the trap block itself
+        const explosionForce = 0.5;
+        const randomX = (Math.random() - 0.5) * explosionForce;
+        const randomY = (Math.random() - 0.5) * explosionForce;
+        
+        Body.applyForce(block, block.position, {
+            x: randomX,
+            y: randomY
+        });
+        
+        // Also affect nearby blocks with stronger force
+        blocks.forEach(otherBlock => {
+            if (otherBlock !== block) {
+                const distance = Math.sqrt(
+                    Math.pow(block.position.x - otherBlock.position.x, 2) +
+                    Math.pow(block.position.y - otherBlock.position.y, 2)
+                );
+                
+                if (distance < 150) { // Smaller radius but stronger force
+                    const forceMultiplier = (150 - distance) / 150 * 0.4;
+                    const directionX = (otherBlock.position.x - block.position.x) / distance;
+                    const directionY = (otherBlock.position.y - block.position.y) / distance;
                     
-                    if (distance < 150) { // Smaller radius but stronger force
-                        const forceMultiplier = (150 - distance) / 150 * 0.4;
-                        const directionX = (otherBlock.position.x - block.position.x) / distance;
-                        const directionY = (otherBlock.position.y - block.position.y) / distance;
-                        
-                        Body.applyForce(otherBlock, otherBlock.position, {
-                            x: directionX * forceMultiplier,
-                            y: directionY * forceMultiplier - 0.1 // Add slight upward force
-                        });
-                    }
+                    Body.applyForce(otherBlock, otherBlock.position, {
+                        x: directionX * forceMultiplier,
+                        y: directionY * forceMultiplier - 0.1 // Add slight upward force
+                    });
                 }
-            });
-        }
+            }
+        });
     });
 }
 
@@ -446,21 +431,13 @@ function endGame() {
     gameActive = false;
     clearInterval(timerInterval);
     
-    // Check if trap blocks were used and trigger chaos if so
-    const trapBlocksUsed = checkTrapBlocksUsed();
+    // Always trigger explosion of all fake blocks when game ends
+    triggerChaosExplosion();
     
-    if (trapBlocksUsed) {
-        // Trigger chaos explosion
-        triggerChaosExplosion();
-        
-        // Wait a moment for chaos to settle before calculating height
-        setTimeout(() => {
-            calculateAndShowResults();
-        }, 2000); // 2 second delay for chaos
-    } else {
-        // No trap blocks used, calculate immediately
+    // Wait a moment for chaos to settle before calculating height
+    setTimeout(() => {
         calculateAndShowResults();
-    }
+    }, 2000); // 2 second delay for chaos
 }
 
 function calculateAndShowResults() {
