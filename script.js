@@ -19,7 +19,7 @@ if (typeof supabase !== 'undefined' && supabase.createClient) {
 let engine, render, runner, world;
 let blocks = [];
 let trapBlocks = [];
-let countdown = 20;
+let countdown = 12;
 let gameActive = false;
 let timerInterval;
 let platform;
@@ -37,51 +37,76 @@ const finalHeight = document.getElementById('finalHeight');
 const teamTypes = [
     {
         name: 'Plattform',
-        width: 160,
-        height: 40,
+        width: 100,
+        height: 25,
         color: '#9FC5E8',
-        count: 2,
+        count: 3,
         isTrap: false
     },
     {
         name: 'Verdistrøm',
-        width: 80,
-        height: 80,
+        width: 50,
+        height: 50,
         color: '#F8D568',
-        count: 2,
+        count: 3,
         isTrap: false
     },
     {
         name: 'Enabling',
-        width: 80,
-        height: 120,
+        width: 50,
+        height: 75,
         color: '#D5A6BD',
-        count: 2,
+        count: 3,
         isTrap: false
     },
     {
         name: 'Subsystem',
-        width: 60,
-        height: 60,
+        width: 40,
+        height: 40,
         color: '#F6B26B',
-        count: 2,
+        count: 3,
         isTrap: false
     },
     {
         name: 'Database',
-        width: 100,
-        height: 100,
+        width: 60,
+        height: 60,
         color: '#cccccc',
         count: 2,
         isTrap: true
     },
     {
         name: 'Portefølje',
-        width: 100,
-        height: 100,
+        width: 60,
+        height: 60,
         color: '#b6d7a8',
         count: 2,
         isTrap: true
+    },
+    {
+        name: 'Support',
+        width: 60,
+        height: 60,
+        color: '#ff9999',
+        count: 2,
+        isTrap: true
+    },
+    {
+        name: 'Smidig',
+        width: 60,
+        height: 60,
+        color: '#c9daf8',
+        count: 2,
+        isTrap: true
+    },
+    {
+        name: 'Test',
+        radius: 30,
+        color: '#000000',
+        textColor: '#ffffff',
+        count: 1,
+        isTrap: true,
+        isRound: true
     }
 ];
 
@@ -133,23 +158,23 @@ function resetGame() {
     // Reset variables
     blocks = [];
     trapBlocks = [];
-    countdown = 20;
+    countdown = 12;
     gameActive = false;
     
     // Reset UI
     startBtn.disabled = false;
     nameInput.disabled = false;
     nameInput.value = '';
-    timeDisplay.textContent = '20';
+    timeDisplay.textContent = '12';
     heightDisplay.textContent = '0';
     resultDiv.style.display = 'none';
     resetBtn.style.display = 'none';
 }
 
 function initGame() {
-    // Create engine with lower gravity
+    // Create engine with higher gravity for more realistic and unstable physics
     engine = Engine.create();
-    engine.world.gravity.y = 0.5;
+    engine.world.gravity.y = 1.0; // Increased from 0.8 for more instability
     world = engine.world;
     
     // Create renderer
@@ -161,7 +186,7 @@ function initGame() {
             width: window.innerWidth,
             height: window.innerHeight,
             wireframes: false,
-            background: '#87CEEB',
+            background: '#ffffff',
             showVelocity: false,
             showAngleIndicator: false,
             showDebug: false
@@ -171,6 +196,7 @@ function initGame() {
     // Create boundaries
     const ground = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 10, window.innerWidth, 20, {
         isStatic: true,
+        friction: 0.8, // Higher friction for ground to provide contrast
         render: { fillStyle: '#8B4513' }
     });
     
@@ -184,9 +210,10 @@ function initGame() {
         render: { fillStyle: '#8B4513' }
     });
     
-    // Create platform (TINE logo placeholder)
+    // Create platform (smaller for mobile and difficulty)
     platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, 200, 20, {
         isStatic: true,
+        friction: 0.6, // Medium friction on platform - not too grippy
         render: { fillStyle: '#666' }
     });
     
@@ -230,6 +257,30 @@ function initGame() {
     // Add event for rendering labels
     Events.on(render, 'afterRender', drawLabels);
     
+    // Add collision event to create instability when blocks land on each other
+    Events.on(engine, 'collisionStart', function(event) {
+        event.pairs.forEach(function(pair) {
+            const { bodyA, bodyB } = pair;
+            
+            // Skip if either body is static (ground, walls, platform)
+            if (bodyA.isStatic || bodyB.isStatic) return;
+            
+            // Add small random forces to create instability when blocks collide
+            const perturbationForce = 0.002;
+            const randomX = (Math.random() - 0.5) * perturbationForce;
+            const randomY = (Math.random() - 0.5) * perturbationForce * 0.5; // Less vertical randomness
+            
+            // Apply small force to both bodies to create realistic instability
+            Body.applyForce(bodyA, bodyA.position, { x: randomX, y: randomY });
+            Body.applyForce(bodyB, bodyB.position, { x: -randomX, y: randomY });
+            
+            // Add small angular velocity to encourage tipping
+            const angularPerturbation = (Math.random() - 0.5) * 0.01;
+            Body.setAngularVelocity(bodyA, bodyA.angularVelocity + angularPerturbation);
+            Body.setAngularVelocity(bodyB, bodyB.angularVelocity - angularPerturbation);
+        });
+    });
+    
     gameActive = true;
 }
 
@@ -237,32 +288,61 @@ function createTeamBlocks() {
     let xOffset = 50;
     const baseY = window.innerHeight - 150;
     
+    // Track trap blocks to place on platform
+    let trapBlocksToPlace = [];
+    
     teamTypes.forEach(teamType => {
         for (let i = 0; i < teamType.count; i++) {
             const blockX = xOffset;
-            const blockY = baseY - (i * (teamType.height + 10));
+            const blockHeight = teamType.isRound ? teamType.radius * 2 : teamType.height;
+            const blockY = baseY - (i * (blockHeight + 10));
             
-            const block = Bodies.rectangle(
-                blockX,
-                blockY,
-                teamType.width,
-                teamType.height,
-                {
-                    restitution: 0, // No bouncing
-                    friction: 0.8, // High friction
-                    frictionStatic: 0.9,
-                    inertia: Infinity, // Prevents rotation when dragged
-                    render: {
-                        fillStyle: teamType.color,
-                        strokeStyle: '#333',
-                        lineWidth: 2
+            let block;
+            if (teamType.isRound) {
+                block = Bodies.circle(
+                    blockX,
+                    blockY,
+                    teamType.radius,
+                    {
+                        restitution: 0.2, // Increased bounce for more dynamic interactions
+                        friction: 0.2, // Much lower friction - blocks slip easily
+                        frictionStatic: 0.3, // Lower static friction - easier to start sliding
+                        frictionAir: 0.01, // Air resistance for more realistic motion
+                        density: 0.001, // Lower density for easier tipping
+                        render: {
+                            fillStyle: teamType.color,
+                            strokeStyle: '#333',
+                            lineWidth: 2
+                        }
                     }
-                }
-            );
+                );
+            } else {
+                block = Bodies.rectangle(
+                    blockX,
+                    blockY,
+                    teamType.width,
+                    teamType.height,
+                    {
+                        restitution: 0.2, // Increased bounce for more dynamic interactions
+                        friction: 0.2, // Much lower friction - blocks slip easily
+                        frictionStatic: 0.3, // Lower static friction - easier to start sliding
+                        frictionAir: 0.01, // Air resistance for more realistic motion
+                        density: 0.001, // Lower density for easier tipping
+                        // Removed inertia: Infinity to allow rotation and tipping
+                        render: {
+                            fillStyle: teamType.color,
+                            strokeStyle: '#333',
+                            lineWidth: 2
+                        }
+                    }
+                );
+            }
             
             // Add team type info to the block
             block.teamType = teamType.name;
             block.isTrap = teamType.isTrap || false;
+            block.isRound = teamType.isRound || false;
+            block.textColor = teamType.textColor || '#000';
             block.initialPosition = { x: blockX, y: blockY };
             
             blocks.push(block);
@@ -270,12 +350,44 @@ function createTeamBlocks() {
             // Keep track of trap blocks separately
             if (block.isTrap) {
                 trapBlocks.push(block);
+                // Collect first three trap blocks to place on platform
+                if (trapBlocksToPlace.length < 3) {
+                    trapBlocksToPlace.push(block);
+                }
             }
             
             World.add(world, block);
         }
-        xOffset += teamType.width + 30;
+        const blockWidth = teamType.isRound ? teamType.radius * 2 : teamType.width;
+        xOffset += blockWidth + 15;
     });
+    
+    // Place three trap blocks on the platform
+    if (trapBlocksToPlace.length >= 3) {
+        const platformX = window.innerWidth / 2;
+        const platformY = window.innerHeight - 80;
+        
+        // Position first trap block on platform (left)
+        Body.setPosition(trapBlocksToPlace[0], {
+            x: platformX - 60,
+            y: platformY - 40
+        });
+        trapBlocksToPlace[0].initialPosition = { x: platformX - 60, y: platformY - 40 };
+        
+        // Position second trap block on platform (right)
+        Body.setPosition(trapBlocksToPlace[1], {
+            x: platformX + 60,
+            y: platformY - 40
+        });
+        trapBlocksToPlace[1].initialPosition = { x: platformX + 60, y: platformY - 40 };
+        
+        // Position third trap block on platform (center - the round "Test" block)
+        Body.setPosition(trapBlocksToPlace[2], {
+            x: platformX,
+            y: platformY - 40
+        });
+        trapBlocksToPlace[2].initialPosition = { x: platformX, y: platformY - 40 };
+    }
 }
 
 function drawLabels() {
@@ -287,8 +399,8 @@ function drawLabels() {
             const bounds = block.bounds;
             
             context.save();
-            context.fillStyle = '#000';
-            context.font = 'bold 12px Arial';
+            context.fillStyle = block.textColor || '#000';
+            context.font = 'bold 10px Arial';
             context.textAlign = 'center';
             context.textBaseline = 'middle';
             
@@ -315,55 +427,43 @@ function startTimer() {
     }, 1000);
 }
 
-function checkTrapBlocksUsed() {
-    // Check if any trap block has been moved significantly from its initial position
-    const moveThreshold = 50; // pixels
-    
-    return trapBlocks.some(block => {
-        const distanceX = Math.abs(block.position.x - block.initialPosition.x);
-        const distanceY = Math.abs(block.position.y - block.initialPosition.y);
-        return distanceX > moveThreshold || distanceY > moveThreshold;
-    });
-}
 
 function triggerChaosExplosion() {
-    // Create explosive forces on all trap blocks that have been moved
+    // Create explosive forces on ALL trap blocks
     trapBlocks.forEach(block => {
-        const distanceX = Math.abs(block.position.x - block.initialPosition.x);
-        const distanceY = Math.abs(block.position.y - block.initialPosition.y);
+        // Visual feedback: make trap block flash red
+        block.render.fillStyle = '#FF0000';
         
-        if (distanceX > 50 || distanceY > 50) {
-            // Apply random explosive force
-            const explosionForce = 0.3;
-            const randomX = (Math.random() - 0.5) * explosionForce;
-            const randomY = (Math.random() - 0.5) * explosionForce;
-            
-            Body.applyForce(block, block.position, {
-                x: randomX,
-                y: randomY
-            });
-            
-            // Also affect nearby blocks
-            blocks.forEach(otherBlock => {
-                if (otherBlock !== block) {
-                    const distance = Math.sqrt(
-                        Math.pow(block.position.x - otherBlock.position.x, 2) +
-                        Math.pow(block.position.y - otherBlock.position.y, 2)
-                    );
+        // Apply stronger explosive force to the trap block itself
+        const explosionForce = 0.5;
+        const randomX = (Math.random() - 0.5) * explosionForce;
+        const randomY = (Math.random() - 0.5) * explosionForce;
+        
+        Body.applyForce(block, block.position, {
+            x: randomX,
+            y: randomY
+        });
+        
+        // Also affect nearby blocks with stronger force
+        blocks.forEach(otherBlock => {
+            if (otherBlock !== block) {
+                const distance = Math.sqrt(
+                    Math.pow(block.position.x - otherBlock.position.x, 2) +
+                    Math.pow(block.position.y - otherBlock.position.y, 2)
+                );
+                
+                if (distance < 150) { // Smaller radius but stronger force
+                    const forceMultiplier = (150 - distance) / 150 * 0.4;
+                    const directionX = (otherBlock.position.x - block.position.x) / distance;
+                    const directionY = (otherBlock.position.y - block.position.y) / distance;
                     
-                    if (distance < 200) { // Within explosion radius
-                        const forceMultiplier = (200 - distance) / 200 * 0.2;
-                        const directionX = (otherBlock.position.x - block.position.x) / distance;
-                        const directionY = (otherBlock.position.y - block.position.y) / distance;
-                        
-                        Body.applyForce(otherBlock, otherBlock.position, {
-                            x: directionX * forceMultiplier,
-                            y: directionY * forceMultiplier
-                        });
-                    }
+                    Body.applyForce(otherBlock, otherBlock.position, {
+                        x: directionX * forceMultiplier,
+                        y: directionY * forceMultiplier - 0.1 // Add slight upward force
+                    });
                 }
-            });
-        }
+            }
+        });
     });
 }
 
@@ -371,21 +471,13 @@ function endGame() {
     gameActive = false;
     clearInterval(timerInterval);
     
-    // Check if trap blocks were used and trigger chaos if so
-    const trapBlocksUsed = checkTrapBlocksUsed();
+    // Always trigger explosion of all fake blocks when game ends
+    triggerChaosExplosion();
     
-    if (trapBlocksUsed) {
-        // Trigger chaos explosion
-        triggerChaosExplosion();
-        
-        // Wait a moment for chaos to settle before calculating height
-        setTimeout(() => {
-            calculateAndShowResults();
-        }, 2000); // 2 second delay for chaos
-    } else {
-        // No trap blocks used, calculate immediately
+    // Wait a moment for chaos to settle before calculating height
+    setTimeout(() => {
         calculateAndShowResults();
-    }
+    }, 2000); // 2 second delay for chaos
 }
 
 function calculateAndShowResults() {
@@ -402,17 +494,21 @@ function calculateAndShowResults() {
 }
 
 function calculateTowerHeight() {
-    const platformTop = platform.position.y - 10; // Platform surface
-    let highestPoint = platformTop;
+    // Calculate the highest point of all blocks
+    let maxHeight = window.innerHeight; // Start from bottom
     
     blocks.forEach(block => {
         const blockTop = block.bounds.min.y;
-        if (blockTop < highestPoint) {
-            highestPoint = blockTop;
+        if (blockTop < maxHeight) {
+            maxHeight = blockTop;
         }
     });
     
-    return Math.max(0, Math.round(platformTop - highestPoint));
+    // Convert to score - higher towers get more points
+    const groundLevel = window.innerHeight - 80; // Platform level
+    const towerHeight = Math.max(0, groundLevel - maxHeight);
+    
+    return Math.round(towerHeight);
 }
 
 async function saveScore(name, score) {
