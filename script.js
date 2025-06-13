@@ -494,18 +494,40 @@ function calculateAndShowResults() {
 }
 
 function calculateTowerHeight() {
-    // Calculate the highest point of all blocks
-    let maxHeight = window.innerHeight; // Start from bottom
+    const platformX = window.innerWidth / 2;
+    const platformWidth = 200;
+    const platformY = window.innerHeight - 80;
+    const groundLevel = platformY;
+    
+    // Only consider blocks that are:
+    // 1. Within platform boundaries (with some tolerance)
+    // 2. Have low velocity (indicating they've settled)
+    // 3. Are on or above the platform level
+    let maxHeight = groundLevel; // Start from platform level
     
     blocks.forEach(block => {
-        const blockTop = block.bounds.min.y;
-        if (blockTop < maxHeight) {
-            maxHeight = blockTop;
+        // Check if block is within platform horizontal boundaries (with tolerance)
+        const blockX = block.position.x;
+        const platformLeft = platformX - (platformWidth / 2) - 50; // Add 50px tolerance
+        const platformRight = platformX + (platformWidth / 2) + 50; // Add 50px tolerance
+        
+        if (blockX >= platformLeft && blockX <= platformRight) {
+            // Check if block has settled (low velocity)
+            const velocity = Math.sqrt(block.velocity.x * block.velocity.x + block.velocity.y * block.velocity.y);
+            const angularVelocity = Math.abs(block.angularVelocity);
+            
+            // Only count blocks that have settled (low velocity)
+            if (velocity < 2 && angularVelocity < 0.1) {
+                // Check if block is on or above platform level
+                const blockTop = block.bounds.min.y;
+                if (blockTop <= groundLevel && blockTop < maxHeight) {
+                    maxHeight = blockTop;
+                }
+            }
         }
     });
     
     // Convert to score - higher towers get more points
-    const groundLevel = window.innerHeight - 80; // Platform level
     const towerHeight = Math.max(0, groundLevel - maxHeight);
     
     return Math.round(towerHeight);
