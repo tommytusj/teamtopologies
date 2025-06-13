@@ -348,7 +348,6 @@ function createTeamBlocks() {
         trapBlocksToPlace[1].initialPosition = { x: platformX + 40, y: platformY - 40 };
     }
 }
-}
 
 function drawLabels() {
     const context = render.context;
