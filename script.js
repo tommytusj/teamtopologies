@@ -82,6 +82,22 @@ const teamTypes = [
         color: '#b6d7a8',
         count: 2,
         isTrap: true
+    },
+    {
+        name: 'Support',
+        width: 60,
+        height: 60,
+        color: '#ff9999',
+        count: 2,
+        isTrap: true
+    },
+    {
+        name: 'Smidig',
+        width: 60,
+        height: 60,
+        color: '#c9daf8',
+        count: 2,
+        isTrap: true
     }
 ];
 
@@ -185,8 +201,8 @@ function initGame() {
         render: { fillStyle: '#8B4513' }
     });
     
-    // Create platform (TINE logo placeholder)
-    platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, 400, 20, {
+    // Create platform (smaller for mobile and difficulty)
+    platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, 200, 20, {
         isStatic: true,
         friction: 0.6, // Medium friction on platform - not too grippy
         render: { fillStyle: '#666' }
@@ -263,6 +279,9 @@ function createTeamBlocks() {
     let xOffset = 50;
     const baseY = window.innerHeight - 150;
     
+    // Track trap blocks to place on platform
+    let trapBlocksToPlace = [];
+    
     teamTypes.forEach(teamType => {
         for (let i = 0; i < teamType.count; i++) {
             const blockX = xOffset;
@@ -298,12 +317,37 @@ function createTeamBlocks() {
             // Keep track of trap blocks separately
             if (block.isTrap) {
                 trapBlocks.push(block);
+                // Collect first two trap blocks to place on platform
+                if (trapBlocksToPlace.length < 2) {
+                    trapBlocksToPlace.push(block);
+                }
             }
             
             World.add(world, block);
         }
         xOffset += teamType.width + 15;
     });
+    
+    // Place two trap blocks on the platform
+    if (trapBlocksToPlace.length >= 2) {
+        const platformX = window.innerWidth / 2;
+        const platformY = window.innerHeight - 80;
+        
+        // Position first trap block on platform
+        Body.setPosition(trapBlocksToPlace[0], {
+            x: platformX - 40,
+            y: platformY - 40
+        });
+        trapBlocksToPlace[0].initialPosition = { x: platformX - 40, y: platformY - 40 };
+        
+        // Position second trap block on top of first
+        Body.setPosition(trapBlocksToPlace[1], {
+            x: platformX + 40,
+            y: platformY - 40
+        });
+        trapBlocksToPlace[1].initialPosition = { x: platformX + 40, y: platformY - 40 };
+    }
+}
 }
 
 function drawLabels() {
@@ -433,31 +477,21 @@ function calculateAndShowResults() {
 }
 
 function calculateTowerHeight() {
-    // Count blocks that are still on or near the platform
-    const platformLeft = platform.position.x - 200; // Platform width is 400
-    const platformRight = platform.position.x + 200;
-    const platformTop = platform.position.y - 10;
-    
-    let blocksOnPlatform = 0;
-    let totalHeight = 0;
+    // Calculate the highest point of all blocks
+    let maxHeight = window.innerHeight; // Start from bottom
     
     blocks.forEach(block => {
-        // Check if block is still on or above the platform
-        const blockCenterX = block.position.x;
-        const blockBottom = block.bounds.max.y;
-        
-        if (blockCenterX >= platformLeft && blockCenterX <= platformRight && 
-            blockBottom <= platformTop + 200) { // Allow some height above platform
-            blocksOnPlatform++;
-            const blockTop = block.bounds.min.y;
-            if (blockTop < platformTop) {
-                totalHeight += platformTop - blockTop;
-            }
+        const blockTop = block.bounds.min.y;
+        if (blockTop < maxHeight) {
+            maxHeight = blockTop;
         }
     });
     
-    // Score combines blocks on platform (major factor) and height (minor factor)
-    return blocksOnPlatform * 50 + Math.round(totalHeight / 10);
+    // Convert to score - higher towers get more points
+    const groundLevel = window.innerHeight - 80; // Platform level
+    const towerHeight = Math.max(0, groundLevel - maxHeight);
+    
+    return Math.round(towerHeight);
 }
 
 async function saveScore(name, score) {
