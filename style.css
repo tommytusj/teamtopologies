@@ -157,6 +157,12 @@ button:disabled {
     .game-info {
         justify-content: center;
         gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .results-link {
+        font-size: 11px;
+        padding: 4px 8px;
     }
     
     #nameInput {

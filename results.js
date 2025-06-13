@@ -17,6 +17,8 @@ const loadingElement = document.getElementById('loading');
 const emptyStateElement = document.getElementById('empty-state');
 const scoreListElement = document.getElementById('score-list');
 const messageAreaElement = document.getElementById('message-area');
+const refreshBtn = document.getElementById('refresh-btn');
+const playerCountElement = document.getElementById('player-count');
 
 // State
 let currentScores = [];
@@ -129,6 +131,29 @@ async function fetchScores() {
     }
 }
 
+// Fetch total player count
+async function fetchPlayerCount() {
+    if (!supabaseClient) {
+        return 0;
+    }
+    
+    try {
+        const { count, error } = await supabaseClient
+            .from('resultater')
+            .select('*', { count: 'exact', head: true });
+        
+        if (error) {
+            console.error('Error fetching player count:', error);
+            return 0;
+        }
+        
+        return count || 0;
+    } catch (error) {
+        console.error('Error connecting to Supabase:', error);
+        return 0;
+    }
+}
+
 // Update the scoreboard with new scores
 function updateScoreboard(scores) {
     const previousScoreIds = currentScores.map(s => s.id);
@@ -185,7 +210,15 @@ function updateTimeAgo() {
 
 // Load and display scores
 async function loadScores() {
-    const scores = await fetchScores();
+    const [scores, playerCount] = await Promise.all([
+        fetchScores(),
+        fetchPlayerCount()
+    ]);
+    
+    // Update player count
+    if (playerCountElement) {
+        playerCountElement.textContent = playerCount;
+    }
     
     if (scores.length === 0) {
         showEmptyState();
@@ -202,7 +235,16 @@ function startPolling() {
     
     // Poll every 3 seconds
     pollInterval = setInterval(async () => {
-        const scores = await fetchScores();
+        const [scores, playerCount] = await Promise.all([
+            fetchScores(),
+            fetchPlayerCount()
+        ]);
+        
+        // Update player count
+        if (playerCountElement) {
+            playerCountElement.textContent = playerCount;
+        }
+        
         if (scores.length > 0) {
             if (emptyStateElement.style.display !== 'none') {
                 showScoreboard();
@@ -226,6 +268,13 @@ function stopPolling() {
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     startPolling();
+    
+    // Add refresh button handler
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            loadScores();
+        });
+    }
 });
 
 // Clean up when page unloads

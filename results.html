@@ -13,11 +13,21 @@
             <h1>🏗️ Team Topologies Tower Resultater</h1>
             <nav>
                 <a href="index.html" class="back-link">← Tilbake til spill</a>
+                <button id="refresh-btn" class="refresh-btn">🔄 Oppdater</button>
             </nav>
         </header>
 
         <div class="scoreboard-container">
             <h2>🏆 Topp 10 Tårn-byggere</h2>
+            <div class="stats-bar">
+                <div class="total-players" id="total-players">
+                    Totalt antall spillere: <span id="player-count">-</span>
+                </div>
+                <div class="status-indicator" id="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Lytter etter nye resultater...</span>
+                </div>
+            </div>
             <div id="message-area" class="message-area"></div>
             
             <div class="scoreboard" id="scoreboard">
