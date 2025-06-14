@@ -24,6 +24,19 @@ let gameActive = false;
 let timerInterval;
 let platform;
 
+// Mobile detection and size scaling
+function isMobile() {
+    return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+function getScaleFactor() {
+    return isMobile() ? 0.75 : 1.0; // 25% smaller on mobile
+}
+
+function getPlatformWidth() {
+    return 200 * getScaleFactor(); // Base width 200px, scaled for mobile
+}
+
 // UI elements
 const nameInput = document.getElementById('nameInput');
 const startBtn = document.getElementById('startBtn');
@@ -211,7 +224,7 @@ function initGame() {
     });
     
     // Create platform (smaller for mobile and difficulty)
-    platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, 200, 20, {
+    platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, getPlatformWidth(), 20, {
         isStatic: true,
         friction: 0.6, // Medium friction on platform - not too grippy
         render: { fillStyle: '#666' }
@@ -294,7 +307,8 @@ function createTeamBlocks() {
     teamTypes.forEach(teamType => {
         for (let i = 0; i < teamType.count; i++) {
             const blockX = xOffset;
-            const blockHeight = teamType.isRound ? teamType.radius * 2 : teamType.height;
+            const scaleFactor = getScaleFactor();
+            const blockHeight = teamType.isRound ? (teamType.radius * 2 * scaleFactor) : (teamType.height * scaleFactor);
             const blockY = baseY - (i * (blockHeight + 10));
             
             let block;
@@ -302,7 +316,7 @@ function createTeamBlocks() {
                 block = Bodies.circle(
                     blockX,
                     blockY,
-                    teamType.radius,
+                    teamType.radius * scaleFactor,
                     {
                         restitution: 0.2, // Increased bounce for more dynamic interactions
                         friction: 0.2, // Much lower friction - blocks slip easily
@@ -320,8 +334,8 @@ function createTeamBlocks() {
                 block = Bodies.rectangle(
                     blockX,
                     blockY,
-                    teamType.width,
-                    teamType.height,
+                    teamType.width * scaleFactor,
+                    teamType.height * scaleFactor,
                     {
                         restitution: 0.2, // Increased bounce for more dynamic interactions
                         friction: 0.2, // Much lower friction - blocks slip easily
@@ -358,7 +372,8 @@ function createTeamBlocks() {
             
             World.add(world, block);
         }
-        const blockWidth = teamType.isRound ? teamType.radius * 2 : teamType.width;
+        const scaleFactor = getScaleFactor();
+        const blockWidth = teamType.isRound ? (teamType.radius * 2 * scaleFactor) : (teamType.width * scaleFactor);
         xOffset += blockWidth + 15;
     });
     
@@ -366,20 +381,22 @@ function createTeamBlocks() {
     if (trapBlocksToPlace.length >= 3) {
         const platformX = window.innerWidth / 2;
         const platformY = window.innerHeight - 80;
+        const scaleFactor = getScaleFactor();
+        const spacing = 60 * scaleFactor; // Scale the spacing too
         
         // Position first trap block on platform (left)
         Body.setPosition(trapBlocksToPlace[0], {
-            x: platformX - 60,
+            x: platformX - spacing,
             y: platformY - 40
         });
-        trapBlocksToPlace[0].initialPosition = { x: platformX - 60, y: platformY - 40 };
+        trapBlocksToPlace[0].initialPosition = { x: platformX - spacing, y: platformY - 40 };
         
         // Position second trap block on platform (right)
         Body.setPosition(trapBlocksToPlace[1], {
-            x: platformX + 60,
+            x: platformX + spacing,
             y: platformY - 40
         });
-        trapBlocksToPlace[1].initialPosition = { x: platformX + 60, y: platformY - 40 };
+        trapBlocksToPlace[1].initialPosition = { x: platformX + spacing, y: platformY - 40 };
         
         // Position third trap block on platform (center - the round "Test" block)
         Body.setPosition(trapBlocksToPlace[2], {
@@ -400,7 +417,9 @@ function drawLabels() {
             
             context.save();
             context.fillStyle = block.textColor || '#000';
-            context.font = 'bold 10px Arial';
+            const scaleFactor = getScaleFactor();
+            const fontSize = Math.max(8, Math.round(10 * scaleFactor)); // Scale font but keep minimum readable size
+            context.font = `bold ${fontSize}px Arial`;
             context.textAlign = 'center';
             context.textBaseline = 'middle';
             
@@ -495,7 +514,7 @@ function calculateAndShowResults() {
 
 function calculateTowerHeight() {
     const platformX = window.innerWidth / 2;
-    const platformWidth = 200;
+    const platformWidth = getPlatformWidth();
     const platformY = window.innerHeight - 80;
     const groundLevel = platformY;
     
