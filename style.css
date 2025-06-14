@@ -97,6 +97,21 @@ button:disabled {
     color: #4ECDC4;
 }
 
+.results-link {
+    color: #667eea;
+    text-decoration: none;
+    padding: 6px 12px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-size: 12px;
+}
+
+.results-link:hover {
+    background: rgba(102, 126, 234, 0.2);
+    transform: translateY(-1px);
+}
+
 #resetBtn {
     margin-top: 10px;
     background-color: #FF6B6B;
@@ -142,6 +157,12 @@ button:disabled {
     .game-info {
         justify-content: center;
         gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .results-link {
+        font-size: 11px;
+        padding: 4px 8px;
     }
     
     #nameInput {
