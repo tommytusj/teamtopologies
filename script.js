@@ -28,7 +28,7 @@ let factoryImage;
 // Load factory image
 function loadFactoryImage() {
     factoryImage = new Image();
-    factoryImage.src = 'assets/factory.svg';
+    factoryImage.src = 'assets/ChatGPT Image 15. juni 2025, 11_30_02.png';
     factoryImage.onload = function() {
         console.log('Factory image loaded');
     };
