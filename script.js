@@ -23,6 +23,20 @@ let countdown = 12;
 let gameActive = false;
 let timerInterval;
 let platform;
+let factoryImage;
+
+// Load factory image
+function loadFactoryImage() {
+    factoryImage = new Image();
+    factoryImage.src = 'assets/factory.svg';
+    factoryImage.onload = function() {
+        console.log('Factory image loaded');
+    };
+    factoryImage.onerror = function() {
+        console.log('Factory image failed to load, using fallback');
+        factoryImage = null;
+    };
+}
 
 // Mobile detection and size scaling
 function isMobile() {
@@ -223,11 +237,15 @@ function initGame() {
         render: { fillStyle: '#8B4513' }
     });
     
-    // Create platform (smaller for mobile and difficulty)
-    platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, getPlatformWidth(), 20, {
+    // Create platform (using factory image as platform)
+    platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, getPlatformWidth(), 50, {
         isStatic: true,
         friction: 0.6, // Medium friction on platform - not too grippy
-        render: { fillStyle: '#666' }
+        render: { 
+            fillStyle: 'transparent', // Make invisible, we'll draw image on top
+            strokeStyle: '#333',
+            lineWidth: 3
+        }
     });
     
     World.add(world, [ground, leftWall, rightWall, platform]);
@@ -410,6 +428,25 @@ function createTeamBlocks() {
 function drawLabels() {
     const context = render.context;
     
+    // Draw factory image on platform if loaded
+    if (factoryImage && platform) {
+        const platformX = platform.position.x;
+        const platformY = platform.position.y;
+        const platformWidth = getPlatformWidth();
+        const platformHeight = 50;
+        
+        context.save();
+        // Draw factory image
+        context.drawImage(
+            factoryImage,
+            platformX - platformWidth / 2,
+            platformY - platformHeight / 2,
+            platformWidth,
+            platformHeight
+        );
+        context.restore();
+    }
+    
     blocks.forEach(block => {
         if (block.teamType) {
             const pos = block.position;
@@ -448,13 +485,13 @@ function startTimer() {
 
 
 function triggerChaosExplosion() {
-    // Create explosive forces on ALL trap blocks
+    // Create much weaker explosive forces on ALL trap blocks
     trapBlocks.forEach(block => {
         // Visual feedback: make trap block flash red
         block.render.fillStyle = '#FF0000';
         
-        // Apply stronger explosive force to the trap block itself
-        const explosionForce = 0.5;
+        // Apply much weaker explosive force to the trap block itself
+        const explosionForce = 0.05; // Reduced from 0.5 to 0.05 (10x weaker)
         const randomX = (Math.random() - 0.5) * explosionForce;
         const randomY = (Math.random() - 0.5) * explosionForce;
         
@@ -463,7 +500,7 @@ function triggerChaosExplosion() {
             y: randomY
         });
         
-        // Also affect nearby blocks with stronger force
+        // Also affect nearby blocks with much weaker force
         blocks.forEach(otherBlock => {
             if (otherBlock !== block) {
                 const distance = Math.sqrt(
@@ -471,14 +508,14 @@ function triggerChaosExplosion() {
                     Math.pow(block.position.y - otherBlock.position.y, 2)
                 );
                 
-                if (distance < 150) { // Smaller radius but stronger force
-                    const forceMultiplier = (150 - distance) / 150 * 0.4;
+                if (distance < 100) { // Smaller radius for more localized effect
+                    const forceMultiplier = (100 - distance) / 100 * 0.03; // Much weaker force (0.4 -> 0.03)
                     const directionX = (otherBlock.position.x - block.position.x) / distance;
                     const directionY = (otherBlock.position.y - block.position.y) / distance;
                     
                     Body.applyForce(otherBlock, otherBlock.position, {
                         x: directionX * forceMultiplier,
-                        y: directionY * forceMultiplier - 0.1 // Add slight upward force
+                        y: directionY * forceMultiplier - 0.01 // Much smaller upward force (0.1 -> 0.01)
                     });
                 }
             }
@@ -587,4 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('world');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    
+    // Load factory image
+    loadFactoryImage();
 });

@@ -1,0 +1,25 @@
+<svg width="200" height="80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Factory building -->
+  <rect x="10" y="30" width="180" height="40" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  <!-- Chimney 1 -->
+  <rect x="30" y="10" width="15" height="30" fill="#654321"/>
+  <!-- Chimney 2 -->
+  <rect x="60" y="5" width="15" height="35" fill="#654321"/>
+  <!-- Chimney 3 -->
+  <rect x="130" y="8" width="15" height="32" fill="#654321"/>
+  <!-- Smoke -->
+  <circle cx="37" cy="8" r="3" fill="#ccc" opacity="0.7"/>
+  <circle cx="67" cy="3" r="3" fill="#ccc" opacity="0.7"/>
+  <circle cx="137" cy="6" r="3" fill="#ccc" opacity="0.7"/>
+  <!-- Windows -->
+  <rect x="20" y="40" width="10" height="10" fill="#87CEEB"/>
+  <rect x="40" y="40" width="10" height="10" fill="#87CEEB"/>
+  <rect x="80" y="40" width="10" height="10" fill="#87CEEB"/>
+  <rect x="100" y="40" width="10" height="10" fill="#87CEEB"/>
+  <rect x="150" y="40" width="10" height="10" fill="#87CEEB"/>
+  <rect x="170" y="40" width="10" height="10" fill="#87CEEB"/>
+  <!-- Door -->
+  <rect x="110" y="50" width="15" height="20" fill="#654321"/>
+  <!-- Border -->
+  <rect x="5" y="25" width="190" height="50" fill="none" stroke="#333" stroke-width="3"/>
+</svg>
