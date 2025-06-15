@@ -6,7 +6,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #ffffff;
     overflow: hidden;
     height: 100vh;
     position: relative;
@@ -14,7 +14,7 @@ body {
 
 #world {
     display: block;
-    background-color: #87CEEB;
+    background-color: #ffffff;
     cursor: grab;
 }
 
@@ -24,14 +24,26 @@ body {
 
 #hud {
     position: absolute;
-    top: 10px;
+    top: 5px;
     left: 10px;
     right: 10px;
     z-index: 1000;
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 8px;
-    padding: 15px;
+    padding: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo-section {
+    text-align: center;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+#companyLogo {
+    display: block;
+    margin: 0 auto;
 }
 
 .hud-top {
@@ -138,16 +150,30 @@ button:disabled {
 /* Mobile responsiveness */
 @media (max-width: 768px) {
     #hud {
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        padding: 10px;
+        top: 1px;
+        left: 2px;
+        right: 2px;
+        padding: 4px;
+    }
+    
+    .logo-section {
+        margin-bottom: 4px;
+        padding-bottom: 4px;
+    }
+    
+    .logo-section h2 {
+        font-size: 14px !important;
+    }
+    
+    #companyLogo {
+        height: 25px !important;
+        margin-bottom: 3px !important;
     }
     
     .hud-top {
         flex-direction: column;
         align-items: stretch;
-        gap: 10px;
+        gap: 4px;
     }
     
     .input-section {
@@ -168,27 +194,32 @@ button:disabled {
     #nameInput {
         min-width: 120px;
         font-size: 16px; /* Prevents zoom on iOS */
+        padding: 6px 8px;
     }
     
     button {
         font-size: 16px; /* Prevents zoom on iOS */
-        padding: 10px 16px;
+        padding: 6px 12px;
     }
 }
 
 @media (max-width: 480px) {
     .input-section {
-        flex-direction: column;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center;
     }
     
     .game-info {
-        flex-direction: column;
-        gap: 5px;
+        flex-direction: row;
+        gap: 8px;
+        font-size: 12px;
     }
     
     #nameInput {
-        width: 100%;
-        margin-bottom: 5px;
+        flex: 1;
+        max-width: 150px;
+        margin-bottom: 0;
     }
 }
 
