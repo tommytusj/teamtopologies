@@ -84,7 +84,7 @@ const teamTypes = [
         width: 115,
         height: 29,
         color: '#9FC5E8',
-        count: 2,
+        count: 1,
         isTrap: false
     },
     {
@@ -92,7 +92,7 @@ const teamTypes = [
         width: 58,
         height: 58,
         color: '#F8D568',
-        count: 2,
+        count: 1,
         isTrap: false
     },
     {
@@ -100,7 +100,7 @@ const teamTypes = [
         width: 58,
         height: 86,
         color: '#D5A6BD',
-        count: 2,
+        count: 1,
         isTrap: false
     },
     {
@@ -108,7 +108,7 @@ const teamTypes = [
         width: 46,
         height: 46,
         color: '#F6B26B',
-        count: 2,
+        count: 1,
         isTrap: false
     },
     {
@@ -116,7 +116,7 @@ const teamTypes = [
         width: 69,
         height: 69,
         color: '#cccccc',
-        count: 2,
+        count: 1,
         isTrap: true
     },
     {
@@ -124,7 +124,7 @@ const teamTypes = [
         width: 69,
         height: 69,
         color: '#b6d7a8',
-        count: 2,
+        count: 1,
         isTrap: true
     },
     {
@@ -132,7 +132,7 @@ const teamTypes = [
         width: 69,
         height: 69,
         color: '#ff9999',
-        count: 2,
+        count: 1,
         isTrap: true
     },
     {
@@ -140,7 +140,7 @@ const teamTypes = [
         width: 69,
         height: 69,
         color: '#c9daf8',
-        count: 2,
+        count: 1,
         isTrap: true
     },
     {
