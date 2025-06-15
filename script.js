@@ -81,71 +81,71 @@ const finalHeight = document.getElementById('finalHeight');
 const teamTypes = [
     {
         name: 'Plattform',
-        width: 100,
-        height: 25,
+        width: 115,
+        height: 29,
         color: '#9FC5E8',
-        count: 3,
+        count: 2,
         isTrap: false
     },
     {
         name: 'Verdistrøm',
-        width: 50,
-        height: 50,
+        width: 58,
+        height: 58,
         color: '#F8D568',
-        count: 3,
+        count: 2,
         isTrap: false
     },
     {
         name: 'Enabling',
-        width: 50,
-        height: 75,
+        width: 58,
+        height: 86,
         color: '#D5A6BD',
-        count: 3,
+        count: 2,
         isTrap: false
     },
     {
         name: 'Subsystem',
-        width: 40,
-        height: 40,
+        width: 46,
+        height: 46,
         color: '#F6B26B',
-        count: 3,
+        count: 2,
         isTrap: false
     },
     {
         name: 'Database',
-        width: 60,
-        height: 60,
+        width: 69,
+        height: 69,
         color: '#cccccc',
         count: 2,
         isTrap: true
     },
     {
         name: 'Portefølje',
-        width: 60,
-        height: 60,
+        width: 69,
+        height: 69,
         color: '#b6d7a8',
         count: 2,
         isTrap: true
     },
     {
         name: 'Support',
-        width: 60,
-        height: 60,
+        width: 69,
+        height: 69,
         color: '#ff9999',
         count: 2,
         isTrap: true
     },
     {
         name: 'Smidig',
-        width: 60,
-        height: 60,
+        width: 69,
+        height: 69,
         color: '#c9daf8',
         count: 2,
         isTrap: true
     },
     {
         name: 'Test',
-        radius: 30,
+        radius: 35,
         color: '#000000',
         textColor: '#ffffff',
         count: 1,
