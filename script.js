@@ -334,8 +334,8 @@ function createTeamBlocks() {
     let xOffset = isMobile() ? 20 : 30; // Start closer to left edge on mobile
     const baseY = window.innerHeight - 150;
     
-    // Track trap blocks to place on platform
-    let trapBlocksToPlace = [];
+    // Track trap blocks to place on platform - one of each type
+    let trapBlocksToPlace = {};
     
     teamTypes.forEach(teamType => {
         for (let i = 0; i < teamType.count; i++) {
@@ -397,9 +397,10 @@ function createTeamBlocks() {
             // Keep track of trap blocks separately
             if (block.isTrap) {
                 trapBlocks.push(block);
-                // Collect first three trap blocks to place on platform
-                if (trapBlocksToPlace.length < 3) {
-                    trapBlocksToPlace.push(block);
+                // Collect one block of each trap type for platform placement
+                if (!trapBlocksToPlace[teamType.name] && 
+                    (teamType.name === 'Support' || teamType.name === 'Smidig' || teamType.name === 'Test')) {
+                    trapBlocksToPlace[teamType.name] = block;
                 }
             }
             
@@ -410,33 +411,40 @@ function createTeamBlocks() {
         xOffset += blockWidth + 15;
     });
     
-    // Place three trap blocks on the platform
-    if (trapBlocksToPlace.length >= 3) {
+    // Place one trap block of each type on the platform
+    const platformSpecificTraps = ['Support', 'Smidig', 'Test'];
+    const availableTraps = platformSpecificTraps.filter(name => trapBlocksToPlace[name]);
+    
+    if (availableTraps.length > 0) {
         const platformX = window.innerWidth / 2;
         const platformY = window.innerHeight - 80;
         const scaleFactor = getScaleFactor();
         const spacing = 60 * scaleFactor; // Scale the spacing too
         
-        // Position first trap block on platform (left)
-        Body.setPosition(trapBlocksToPlace[0], {
-            x: platformX - spacing,
-            y: platformY - 40
-        });
-        trapBlocksToPlace[0].initialPosition = { x: platformX - spacing, y: platformY - 40 };
+        // Position trap blocks based on available types
+        if (availableTraps.includes('Support')) {
+            Body.setPosition(trapBlocksToPlace['Support'], {
+                x: platformX - spacing,
+                y: platformY - 40
+            });
+            trapBlocksToPlace['Support'].initialPosition = { x: platformX - spacing, y: platformY - 40 };
+        }
         
-        // Position second trap block on platform (right)
-        Body.setPosition(trapBlocksToPlace[1], {
-            x: platformX + spacing,
-            y: platformY - 40
-        });
-        trapBlocksToPlace[1].initialPosition = { x: platformX + spacing, y: platformY - 40 };
+        if (availableTraps.includes('Smidig')) {
+            Body.setPosition(trapBlocksToPlace['Smidig'], {
+                x: platformX + spacing,
+                y: platformY - 40
+            });
+            trapBlocksToPlace['Smidig'].initialPosition = { x: platformX + spacing, y: platformY - 40 };
+        }
         
-        // Position third trap block on platform (center - the round "Test" block)
-        Body.setPosition(trapBlocksToPlace[2], {
-            x: platformX,
-            y: platformY - 40
-        });
-        trapBlocksToPlace[2].initialPosition = { x: platformX, y: platformY - 40 };
+        if (availableTraps.includes('Test')) {
+            Body.setPosition(trapBlocksToPlace['Test'], {
+                x: platformX,
+                y: platformY - 40
+            });
+            trapBlocksToPlace['Test'].initialPosition = { x: platformX, y: platformY - 40 };
+        }
     }
 }
 
@@ -553,8 +561,8 @@ function triggerChaosExplosion() {
         // Visual feedback: make trap block flash red
         block.render.fillStyle = '#FF0000';
         
-        // Apply explosive force to the trap block itself (33% more than 0.075)
-        const explosionForce = 0.1; // Increased from 0.075 to 0.1 (33% more powerful)
+        // Apply explosive force to the trap block itself (15% less than 0.1)
+        const explosionForce = 0.085; // Reduced from 0.1 to 0.085 (15% less powerful)
         const randomX = (Math.random() - 0.5) * explosionForce;
         const randomY = (Math.random() - 0.5) * explosionForce;
         
@@ -572,13 +580,13 @@ function triggerChaosExplosion() {
                 );
                 
                 if (distance < 100) { // Smaller radius for more localized effect
-                    const forceMultiplier = (100 - distance) / 100 * 0.06; // 33% more force (0.045 -> 0.06)
+                    const forceMultiplier = (100 - distance) / 100 * 0.051; // 15% less force (0.06 -> 0.051)
                     const directionX = (otherBlock.position.x - block.position.x) / distance;
                     const directionY = (otherBlock.position.y - block.position.y) / distance;
                     
                     Body.applyForce(otherBlock, otherBlock.position, {
                         x: directionX * forceMultiplier,
-                        y: directionY * forceMultiplier - 0.02 // 33% more upward force (0.015 -> 0.02)
+                        y: directionY * forceMultiplier - 0.017 // 15% less upward force (0.02 -> 0.017)
                     });
                 }
             }

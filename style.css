@@ -205,8 +205,9 @@ button:disabled {
 
 @media (max-width: 480px) {
     .input-section {
-        flex-direction: column;
-        gap: 4px;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center;
     }
     
     .game-info {
@@ -216,8 +217,9 @@ button:disabled {
     }
     
     #nameInput {
-        width: 100%;
-        margin-bottom: 2px;
+        flex: 1;
+        max-width: 150px;
+        margin-bottom: 0;
     }
 }
 
