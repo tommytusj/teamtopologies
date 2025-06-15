@@ -19,7 +19,7 @@ if (typeof supabase !== 'undefined' && supabase.createClient) {
 let engine, render, runner, world;
 let blocks = [];
 let trapBlocks = [];
-let countdown = 12;
+let countdown = 20;
 let gameActive = false;
 let timerInterval;
 let platform;
@@ -185,14 +185,14 @@ function resetGame() {
     // Reset variables
     blocks = [];
     trapBlocks = [];
-    countdown = 12;
+    countdown = 20;
     gameActive = false;
     
     // Reset UI
     startBtn.disabled = false;
     nameInput.disabled = false;
     nameInput.value = '';
-    timeDisplay.textContent = '12';
+    timeDisplay.textContent = '20';
     heightDisplay.textContent = '0';
     resultDiv.style.display = 'none';
     resetBtn.style.display = 'none';
