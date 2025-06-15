@@ -24,6 +24,7 @@ let gameActive = false;
 let timerInterval;
 let platform;
 let factoryImage;
+let grassImage;
 
 // Load factory image
 function loadFactoryImage() {
@@ -35,6 +36,19 @@ function loadFactoryImage() {
     factoryImage.onerror = function() {
         console.log('Factory image failed to load, using fallback');
         factoryImage = null;
+    };
+}
+
+// Load grass image
+function loadGrassImage() {
+    grassImage = new Image();
+    grassImage.src = 'grass.png';
+    grassImage.onload = function() {
+        console.log('Grass image loaded');
+    };
+    grassImage.onerror = function() {
+        console.log('Grass image failed to load, using fallback');
+        grassImage = null;
     };
 }
 
@@ -224,7 +238,7 @@ function initGame() {
     const ground = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 10, window.innerWidth, 20, {
         isStatic: true,
         friction: 0.8, // Higher friction for ground to provide contrast
-        render: { fillStyle: '#8B4513' }
+        render: { fillStyle: 'transparent' } // Make transparent since we'll draw grass image
     });
     
     const leftWall = Bodies.rectangle(-10, window.innerHeight / 2, 20, window.innerHeight, {
@@ -428,6 +442,21 @@ function createTeamBlocks() {
 function drawLabels() {
     const context = render.context;
     
+    // Draw grass image as floor/ground
+    if (grassImage) {
+        context.save();
+        // Draw grass image across the full width at the bottom
+        const grassHeight = 200; // Height of grass area
+        context.drawImage(
+            grassImage,
+            0,
+            window.innerHeight - grassHeight,
+            window.innerWidth,
+            grassHeight
+        );
+        context.restore();
+    }
+    
     // Draw factory image on platform if loaded
     if (factoryImage && platform) {
         const platformX = platform.position.x;
@@ -452,15 +481,13 @@ function drawLabels() {
             totalHeight // Extend all the way to bottom
         );
         
-        // Draw border around the platform area to show where platform starts
+        // Draw border only on top of the platform to show where platform starts
         context.strokeStyle = '#333';
         context.lineWidth = 3;
-        context.strokeRect(
-            platformX - platformWidth / 2,
-            platformY - 25,
-            platformWidth,
-            50 // Just the platform area border
-        );
+        context.beginPath();
+        context.moveTo(platformX - platformWidth / 2, platformY - 25);
+        context.lineTo(platformX + platformWidth / 2, platformY - 25);
+        context.stroke();
         
         context.restore();
     }
@@ -643,6 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
-    // Load factory image
+    // Load factory image and grass image
     loadFactoryImage();
+    loadGrassImage();
 });
