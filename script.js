@@ -485,13 +485,13 @@ function startTimer() {
 
 
 function triggerChaosExplosion() {
-    // Create much weaker explosive forces on ALL trap blocks
+    // Create explosive forces on ALL trap blocks (50% more powerful than before)
     trapBlocks.forEach(block => {
         // Visual feedback: make trap block flash red
         block.render.fillStyle = '#FF0000';
         
-        // Apply much weaker explosive force to the trap block itself
-        const explosionForce = 0.05; // Reduced from 0.5 to 0.05 (10x weaker)
+        // Apply explosive force to the trap block itself (50% more than 0.05)
+        const explosionForce = 0.075; // Increased from 0.05 to 0.075 (50% more powerful)
         const randomX = (Math.random() - 0.5) * explosionForce;
         const randomY = (Math.random() - 0.5) * explosionForce;
         
@@ -500,7 +500,7 @@ function triggerChaosExplosion() {
             y: randomY
         });
         
-        // Also affect nearby blocks with much weaker force
+        // Also affect nearby blocks with 50% more force
         blocks.forEach(otherBlock => {
             if (otherBlock !== block) {
                 const distance = Math.sqrt(
@@ -509,13 +509,13 @@ function triggerChaosExplosion() {
                 );
                 
                 if (distance < 100) { // Smaller radius for more localized effect
-                    const forceMultiplier = (100 - distance) / 100 * 0.03; // Much weaker force (0.4 -> 0.03)
+                    const forceMultiplier = (100 - distance) / 100 * 0.045; // 50% more force (0.03 -> 0.045)
                     const directionX = (otherBlock.position.x - block.position.x) / distance;
                     const directionY = (otherBlock.position.y - block.position.y) / distance;
                     
                     Body.applyForce(otherBlock, otherBlock.position, {
                         x: directionX * forceMultiplier,
-                        y: directionY * forceMultiplier - 0.01 // Much smaller upward force (0.1 -> 0.01)
+                        y: directionY * forceMultiplier - 0.015 // 50% more upward force (0.01 -> 0.015)
                     });
                 }
             }
