@@ -62,13 +62,16 @@ function getScaleFactor() {
 }
 
 function getPlatformWidth() {
-    return 200 * getScaleFactor(); // Base width 200px, scaled for mobile
+    const baseWidth = 200;
+    const scaleFactor = getScaleFactor();
+    // Additional 25% reduction on mobile as requested
+    const mobileReduction = isMobile() ? 0.75 : 1.0;
+    return baseWidth * scaleFactor * mobileReduction; // Base width 200px, scaled for mobile, then additional reduction
 }
 
 // UI elements
 const nameInput = document.getElementById('nameInput');
 const startBtn = document.getElementById('startBtn');
-const resetBtn = document.getElementById('resetBtn');
 const timeDisplay = document.getElementById('timeDisplay');
 const heightDisplay = document.getElementById('heightDisplay');
 const resultDiv = document.getElementById('result');
@@ -153,7 +156,6 @@ const teamTypes = [
 
 // Event listeners
 startBtn.addEventListener('click', startGame);
-resetBtn.addEventListener('click', resetGame);
 window.addEventListener('resize', handleResize);
 
 function startGame() {
@@ -166,7 +168,6 @@ function startGame() {
     startBtn.disabled = true;
     nameInput.disabled = true;
     resultDiv.style.display = 'none';
-    resetBtn.style.display = 'inline-block';
     
     initGame();
     startTimer();
@@ -209,7 +210,6 @@ function resetGame() {
     timeDisplay.textContent = '20';
     heightDisplay.textContent = '0';
     resultDiv.style.display = 'none';
-    resetBtn.style.display = 'none';
 }
 
 function initGame() {
@@ -330,7 +330,8 @@ function initGame() {
 }
 
 function createTeamBlocks() {
-    let xOffset = 50;
+    // Start blocks further from the center to avoid platform area
+    let xOffset = isMobile() ? 20 : 30; // Start closer to left edge on mobile
     const baseY = window.innerHeight - 150;
     
     // Track trap blocks to place on platform
