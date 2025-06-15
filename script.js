@@ -445,15 +445,32 @@ function drawLabels() {
     // Draw grass image as floor/ground
     if (grassImage) {
         context.save();
-        // Draw grass image across the full width at the bottom
-        const grassHeight = 200; // Height of grass area
-        context.drawImage(
-            grassImage,
-            0,
-            window.innerHeight - grassHeight,
-            window.innerWidth,
-            grassHeight
-        );
+        
+        // Calculate grass height as 25% of factory platform height
+        const platformWidth = getPlatformWidth();
+        const factoryAspectRatio = 1536 / 1024; // width / height = 1.5
+        const factoryHeight = platformWidth / factoryAspectRatio;
+        const grassHeight = factoryHeight * 0.25;
+        
+        // Get natural grass image dimensions to maintain aspect ratio
+        const grassAspectRatio = grassImage.naturalWidth / grassImage.naturalHeight;
+        const grassWidth = grassHeight * grassAspectRatio;
+        
+        // Fill the width by tiling the grass image (don't stretch)
+        const grassY = window.innerHeight - grassHeight;
+        let currentX = 0;
+        
+        while (currentX < window.innerWidth) {
+            context.drawImage(
+                grassImage,
+                currentX,
+                grassY,
+                grassWidth,
+                grassHeight
+            );
+            currentX += grassWidth;
+        }
+        
         context.restore();
     }
     
