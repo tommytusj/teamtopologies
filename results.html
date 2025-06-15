@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Topologies Tower - Resultater</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="results.css">
+</head>
+<body class="results-page">
+    <div class="results-container">
+        <header class="results-header">
+            <h1>🏗️ Team Topologies Tower Resultater</h1>
+            <nav>
+                <a href="index.html" class="back-link">← Tilbake til spill</a>
+                <button id="refresh-btn" class="refresh-btn">🔄 Oppdater</button>
+            </nav>
+        </header>
+
+        <div class="scoreboard-container">
+            <h2>🏆 Topp 10 Tårn-byggere</h2>
+            <div class="stats-bar">
+                <div class="total-players" id="total-players">
+                    Totalt antall spillere: <span id="player-count">-</span>
+                </div>
+                <div class="status-indicator" id="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Lytter etter nye resultater...</span>
+                </div>
+            </div>
+            <div id="message-area" class="message-area"></div>
+            
+            <div class="scoreboard" id="scoreboard">
+                <div class="scoreboard-header">
+                    <div class="rank-header">Plass</div>
+                    <div class="name-header">Navn</div>
+                    <div class="score-header">Høyde (px)</div>
+                    <div class="time-header">Tid</div>
+                </div>
+                <div id="score-list" class="score-list">
+                    <!-- Scores will be populated here -->
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Laster resultater...</p>
+            </div>
+            
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <div class="empty-icon">🏗️</div>
+                <h3>Ingen resultater ennå!</h3>
+                <p>Være den første til å bygge et tårn!</p>
+                <a href="index.html" class="play-button">Spill nå</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="results.js"></script>
+</body>
+</html>
