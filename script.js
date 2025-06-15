@@ -433,17 +433,35 @@ function drawLabels() {
         const platformX = platform.position.x;
         const platformY = platform.position.y;
         const platformWidth = getPlatformWidth();
-        const platformHeight = 50;
+        
+        // Calculate height to maintain factory image aspect ratio (1536x1024 = 1.5:1)
+        const aspectRatio = 1536 / 1024; // width / height = 1.5
+        const factoryHeight = platformWidth / aspectRatio;
+        
+        // Extend factory image all the way down from platform to bottom
+        const bottomY = window.innerHeight;
+        const totalHeight = bottomY - (platformY - 25); // Start from platform top
         
         context.save();
-        // Draw factory image
+        // Draw factory image extending down
         context.drawImage(
             factoryImage,
             platformX - platformWidth / 2,
-            platformY - platformHeight / 2,
+            platformY - 25, // Start from platform top
             platformWidth,
-            platformHeight
+            totalHeight // Extend all the way to bottom
         );
+        
+        // Draw border around the platform area to show where platform starts
+        context.strokeStyle = '#333';
+        context.lineWidth = 3;
+        context.strokeRect(
+            platformX - platformWidth / 2,
+            platformY - 25,
+            platformWidth,
+            50 // Just the platform area border
+        );
+        
         context.restore();
     }
     
@@ -490,8 +508,8 @@ function triggerChaosExplosion() {
         // Visual feedback: make trap block flash red
         block.render.fillStyle = '#FF0000';
         
-        // Apply explosive force to the trap block itself (50% more than 0.05)
-        const explosionForce = 0.075; // Increased from 0.05 to 0.075 (50% more powerful)
+        // Apply explosive force to the trap block itself (33% more than 0.075)
+        const explosionForce = 0.1; // Increased from 0.075 to 0.1 (33% more powerful)
         const randomX = (Math.random() - 0.5) * explosionForce;
         const randomY = (Math.random() - 0.5) * explosionForce;
         
@@ -509,13 +527,13 @@ function triggerChaosExplosion() {
                 );
                 
                 if (distance < 100) { // Smaller radius for more localized effect
-                    const forceMultiplier = (100 - distance) / 100 * 0.045; // 50% more force (0.03 -> 0.045)
+                    const forceMultiplier = (100 - distance) / 100 * 0.06; // 33% more force (0.045 -> 0.06)
                     const directionX = (otherBlock.position.x - block.position.x) / distance;
                     const directionY = (otherBlock.position.y - block.position.y) / distance;
                     
                     Body.applyForce(otherBlock, otherBlock.position, {
                         x: directionX * forceMultiplier,
-                        y: directionY * forceMultiplier - 0.015 // 50% more upward force (0.01 -> 0.015)
+                        y: directionY * forceMultiplier - 0.02 // 33% more upward force (0.015 -> 0.02)
                     });
                 }
             }
