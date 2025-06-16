@@ -23,11 +23,55 @@ let countdown = 20;
 let gameActive = false;
 let timerInterval;
 let platform;
+let factoryImage;
+let grassImage;
+
+// Load factory image
+function loadFactoryImage() {
+    factoryImage = new Image();
+    factoryImage.src = 'assets/ChatGPT Image 15. juni 2025, 11_30_02.png';
+    factoryImage.onload = function() {
+        console.log('Factory image loaded');
+    };
+    factoryImage.onerror = function() {
+        console.log('Factory image failed to load, using fallback');
+        factoryImage = null;
+    };
+}
+
+// Load grass image
+function loadGrassImage() {
+    grassImage = new Image();
+    grassImage.src = 'grass.png';
+    grassImage.onload = function() {
+        console.log('Grass image loaded');
+    };
+    grassImage.onerror = function() {
+        console.log('Grass image failed to load, using fallback');
+        grassImage = null;
+    };
+}
+
+// Mobile detection and size scaling
+function isMobile() {
+    return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+function getScaleFactor() {
+    return isMobile() ? 0.75 : 1.0; // 25% smaller on mobile
+}
+
+function getPlatformWidth() {
+    const baseWidth = 200;
+    const scaleFactor = getScaleFactor();
+    // Additional 25% reduction on mobile as requested
+    const mobileReduction = isMobile() ? 0.75 : 1.0;
+    return baseWidth * scaleFactor * mobileReduction; // Base width 200px, scaled for mobile, then additional reduction
+}
 
 // UI elements
 const nameInput = document.getElementById('nameInput');
 const startBtn = document.getElementById('startBtn');
-const resetBtn = document.getElementById('resetBtn');
 const timeDisplay = document.getElementById('timeDisplay');
 const heightDisplay = document.getElementById('heightDisplay');
 const resultDiv = document.getElementById('result');
@@ -37,57 +81,81 @@ const finalHeight = document.getElementById('finalHeight');
 const teamTypes = [
     {
         name: 'Plattform',
-        width: 160,
-        height: 40,
+        width: 115,
+        height: 29,
         color: '#9FC5E8',
-        count: 2,
+        count: 1,
         isTrap: false
     },
     {
         name: 'Verdistrøm',
-        width: 80,
-        height: 80,
+        width: 58,
+        height: 58,
         color: '#F8D568',
-        count: 2,
+        count: 1,
         isTrap: false
     },
     {
         name: 'Enabling',
-        width: 80,
-        height: 120,
+        width: 58,
+        height: 86,
         color: '#D5A6BD',
-        count: 2,
+        count: 1,
         isTrap: false
     },
     {
         name: 'Subsystem',
-        width: 60,
-        height: 60,
+        width: 46,
+        height: 46,
         color: '#F6B26B',
-        count: 2,
+        count: 1,
         isTrap: false
     },
     {
         name: 'Database',
-        width: 100,
-        height: 100,
+        width: 69,
+        height: 69,
         color: '#cccccc',
-        count: 2,
+        count: 1,
         isTrap: true
     },
     {
         name: 'Portefølje',
-        width: 100,
-        height: 100,
+        width: 69,
+        height: 69,
         color: '#b6d7a8',
-        count: 2,
+        count: 1,
         isTrap: true
+    },
+    {
+        name: 'Support',
+        width: 69,
+        height: 69,
+        color: '#ff9999',
+        count: 1,
+        isTrap: true
+    },
+    {
+        name: 'Smidig',
+        width: 69,
+        height: 69,
+        color: '#c9daf8',
+        count: 1,
+        isTrap: true
+    },
+    {
+        name: 'Test',
+        radius: 35,
+        color: '#000000',
+        textColor: '#ffffff',
+        count: 1,
+        isTrap: true,
+        isRound: true
     }
 ];
 
 // Event listeners
 startBtn.addEventListener('click', startGame);
-resetBtn.addEventListener('click', resetGame);
 window.addEventListener('resize', handleResize);
 
 function startGame() {
@@ -100,7 +168,6 @@ function startGame() {
     startBtn.disabled = true;
     nameInput.disabled = true;
     resultDiv.style.display = 'none';
-    resetBtn.style.display = 'inline-block';
     
     initGame();
     startTimer();
@@ -143,13 +210,12 @@ function resetGame() {
     timeDisplay.textContent = '20';
     heightDisplay.textContent = '0';
     resultDiv.style.display = 'none';
-    resetBtn.style.display = 'none';
 }
 
 function initGame() {
-    // Create engine with lower gravity
+    // Create engine with higher gravity for more realistic and unstable physics
     engine = Engine.create();
-    engine.world.gravity.y = 0.5;
+    engine.world.gravity.y = 1.0; // Increased from 0.8 for more instability
     world = engine.world;
     
     // Create renderer
@@ -161,7 +227,7 @@ function initGame() {
             width: window.innerWidth,
             height: window.innerHeight,
             wireframes: false,
-            background: '#87CEEB',
+            background: '#ffffff',
             showVelocity: false,
             showAngleIndicator: false,
             showDebug: false
@@ -171,7 +237,8 @@ function initGame() {
     // Create boundaries
     const ground = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 10, window.innerWidth, 20, {
         isStatic: true,
-        render: { fillStyle: '#8B4513' }
+        friction: 0.8, // Higher friction for ground to provide contrast
+        render: { fillStyle: 'transparent' } // Make transparent since we'll draw grass image
     });
     
     const leftWall = Bodies.rectangle(-10, window.innerHeight / 2, 20, window.innerHeight, {
@@ -184,10 +251,15 @@ function initGame() {
         render: { fillStyle: '#8B4513' }
     });
     
-    // Create platform (TINE logo placeholder)
-    platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, 200, 20, {
+    // Create platform (using factory image as platform)
+    platform = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 80, getPlatformWidth(), 50, {
         isStatic: true,
-        render: { fillStyle: '#666' }
+        friction: 0.6, // Medium friction on platform - not too grippy
+        render: { 
+            fillStyle: 'transparent', // Make invisible, we'll draw image on top
+            strokeStyle: '#333',
+            lineWidth: 3
+        }
     });
     
     World.add(world, [ground, leftWall, rightWall, platform]);
@@ -230,39 +302,94 @@ function initGame() {
     // Add event for rendering labels
     Events.on(render, 'afterRender', drawLabels);
     
+    // Add collision event to create instability when blocks land on each other
+    Events.on(engine, 'collisionStart', function(event) {
+        event.pairs.forEach(function(pair) {
+            const { bodyA, bodyB } = pair;
+            
+            // Skip if either body is static (ground, walls, platform)
+            if (bodyA.isStatic || bodyB.isStatic) return;
+            
+            // Add small random forces to create instability when blocks collide
+            const perturbationForce = 0.002;
+            const randomX = (Math.random() - 0.5) * perturbationForce;
+            const randomY = (Math.random() - 0.5) * perturbationForce * 0.5; // Less vertical randomness
+            
+            // Apply small force to both bodies to create realistic instability
+            Body.applyForce(bodyA, bodyA.position, { x: randomX, y: randomY });
+            Body.applyForce(bodyB, bodyB.position, { x: -randomX, y: randomY });
+            
+            // Add small angular velocity to encourage tipping
+            const angularPerturbation = (Math.random() - 0.5) * 0.01;
+            Body.setAngularVelocity(bodyA, bodyA.angularVelocity + angularPerturbation);
+            Body.setAngularVelocity(bodyB, bodyB.angularVelocity - angularPerturbation);
+        });
+    });
+    
     gameActive = true;
 }
 
 function createTeamBlocks() {
-    let xOffset = 50;
+    // Start blocks further from the center to avoid platform area
+    let xOffset = isMobile() ? 20 : 30; // Start closer to left edge on mobile
     const baseY = window.innerHeight - 150;
+    
+    // Track trap blocks to place on platform - one of each type
+    let trapBlocksToPlace = {};
     
     teamTypes.forEach(teamType => {
         for (let i = 0; i < teamType.count; i++) {
             const blockX = xOffset;
-            const blockY = baseY - (i * (teamType.height + 10));
+            const scaleFactor = getScaleFactor();
+            const blockHeight = teamType.isRound ? (teamType.radius * 2 * scaleFactor) : (teamType.height * scaleFactor);
+            const blockY = baseY - (i * (blockHeight + 10));
             
-            const block = Bodies.rectangle(
-                blockX,
-                blockY,
-                teamType.width,
-                teamType.height,
-                {
-                    restitution: 0, // No bouncing
-                    friction: 0.8, // High friction
-                    frictionStatic: 0.9,
-                    inertia: Infinity, // Prevents rotation when dragged
-                    render: {
-                        fillStyle: teamType.color,
-                        strokeStyle: '#333',
-                        lineWidth: 2
+            let block;
+            if (teamType.isRound) {
+                block = Bodies.circle(
+                    blockX,
+                    blockY,
+                    teamType.radius * scaleFactor,
+                    {
+                        restitution: 0.2, // Increased bounce for more dynamic interactions
+                        friction: 0.2, // Much lower friction - blocks slip easily
+                        frictionStatic: 0.3, // Lower static friction - easier to start sliding
+                        frictionAir: 0.01, // Air resistance for more realistic motion
+                        density: 0.001, // Lower density for easier tipping
+                        render: {
+                            fillStyle: teamType.color,
+                            strokeStyle: '#333',
+                            lineWidth: 2
+                        }
                     }
-                }
-            );
+                );
+            } else {
+                block = Bodies.rectangle(
+                    blockX,
+                    blockY,
+                    teamType.width * scaleFactor,
+                    teamType.height * scaleFactor,
+                    {
+                        restitution: 0.2, // Increased bounce for more dynamic interactions
+                        friction: 0.2, // Much lower friction - blocks slip easily
+                        frictionStatic: 0.3, // Lower static friction - easier to start sliding
+                        frictionAir: 0.01, // Air resistance for more realistic motion
+                        density: 0.001, // Lower density for easier tipping
+                        // Removed inertia: Infinity to allow rotation and tipping
+                        render: {
+                            fillStyle: teamType.color,
+                            strokeStyle: '#333',
+                            lineWidth: 2
+                        }
+                    }
+                );
+            }
             
             // Add team type info to the block
             block.teamType = teamType.name;
             block.isTrap = teamType.isTrap || false;
+            block.isRound = teamType.isRound || false;
+            block.textColor = teamType.textColor || '#000';
             block.initialPosition = { x: blockX, y: blockY };
             
             blocks.push(block);
@@ -270,16 +397,126 @@ function createTeamBlocks() {
             // Keep track of trap blocks separately
             if (block.isTrap) {
                 trapBlocks.push(block);
+                // Collect one block of each trap type for platform placement
+                if (!trapBlocksToPlace[teamType.name] && 
+                    (teamType.name === 'Support' || teamType.name === 'Smidig' || teamType.name === 'Test')) {
+                    trapBlocksToPlace[teamType.name] = block;
+                }
             }
             
             World.add(world, block);
         }
-        xOffset += teamType.width + 30;
+        const scaleFactor = getScaleFactor();
+        const blockWidth = teamType.isRound ? (teamType.radius * 2 * scaleFactor) : (teamType.width * scaleFactor);
+        xOffset += blockWidth + 15;
     });
+    
+    // Place one trap block of each type on the platform
+    const platformSpecificTraps = ['Support', 'Smidig', 'Test'];
+    const availableTraps = platformSpecificTraps.filter(name => trapBlocksToPlace[name]);
+    
+    if (availableTraps.length > 0) {
+        const platformX = window.innerWidth / 2;
+        const platformY = window.innerHeight - 80;
+        const scaleFactor = getScaleFactor();
+        const spacing = 60 * scaleFactor; // Scale the spacing too
+        
+        // Position trap blocks based on available types
+        if (availableTraps.includes('Support')) {
+            Body.setPosition(trapBlocksToPlace['Support'], {
+                x: platformX - spacing,
+                y: platformY - 40
+            });
+            trapBlocksToPlace['Support'].initialPosition = { x: platformX - spacing, y: platformY - 40 };
+        }
+        
+        if (availableTraps.includes('Smidig')) {
+            Body.setPosition(trapBlocksToPlace['Smidig'], {
+                x: platformX + spacing,
+                y: platformY - 40
+            });
+            trapBlocksToPlace['Smidig'].initialPosition = { x: platformX + spacing, y: platformY - 40 };
+        }
+        
+        if (availableTraps.includes('Test')) {
+            Body.setPosition(trapBlocksToPlace['Test'], {
+                x: platformX,
+                y: platformY - 40
+            });
+            trapBlocksToPlace['Test'].initialPosition = { x: platformX, y: platformY - 40 };
+        }
+    }
 }
 
 function drawLabels() {
     const context = render.context;
+    
+    // Draw grass image as floor/ground
+    if (grassImage) {
+        context.save();
+        
+        // Calculate grass height as 25% of factory platform height
+        const platformWidth = getPlatformWidth();
+        const factoryAspectRatio = 1536 / 1024; // width / height = 1.5
+        const factoryHeight = platformWidth / factoryAspectRatio;
+        const grassHeight = factoryHeight * 0.25;
+        
+        // Get natural grass image dimensions to maintain aspect ratio
+        const grassAspectRatio = grassImage.naturalWidth / grassImage.naturalHeight;
+        const grassWidth = grassHeight * grassAspectRatio;
+        
+        // Fill the width by tiling the grass image (don't stretch)
+        const grassY = window.innerHeight - grassHeight;
+        let currentX = 0;
+        
+        while (currentX < window.innerWidth) {
+            context.drawImage(
+                grassImage,
+                currentX,
+                grassY,
+                grassWidth,
+                grassHeight
+            );
+            currentX += grassWidth;
+        }
+        
+        context.restore();
+    }
+    
+    // Draw factory image on platform if loaded
+    if (factoryImage && platform) {
+        const platformX = platform.position.x;
+        const platformY = platform.position.y;
+        const platformWidth = getPlatformWidth();
+        
+        // Calculate height to maintain factory image aspect ratio (1536x1024 = 1.5:1)
+        const aspectRatio = 1536 / 1024; // width / height = 1.5
+        const factoryHeight = platformWidth / aspectRatio;
+        
+        // Extend factory image all the way down from platform to bottom
+        const bottomY = window.innerHeight;
+        const totalHeight = bottomY - (platformY - 25); // Start from platform top
+        
+        context.save();
+        // Draw factory image extending down
+        context.drawImage(
+            factoryImage,
+            platformX - platformWidth / 2,
+            platformY - 25, // Start from platform top
+            platformWidth,
+            totalHeight // Extend all the way to bottom
+        );
+        
+        // Draw border only on top of the platform to show where platform starts
+        context.strokeStyle = '#333';
+        context.lineWidth = 3;
+        context.beginPath();
+        context.moveTo(platformX - platformWidth / 2, platformY - 25);
+        context.lineTo(platformX + platformWidth / 2, platformY - 25);
+        context.stroke();
+        
+        context.restore();
+    }
     
     blocks.forEach(block => {
         if (block.teamType) {
@@ -287,8 +524,10 @@ function drawLabels() {
             const bounds = block.bounds;
             
             context.save();
-            context.fillStyle = '#000';
-            context.font = 'bold 12px Arial';
+            context.fillStyle = block.textColor || '#000';
+            const scaleFactor = getScaleFactor();
+            const fontSize = Math.max(8, Math.round(10 * scaleFactor)); // Scale font but keep minimum readable size
+            context.font = `bold ${fontSize}px Arial`;
             context.textAlign = 'center';
             context.textBaseline = 'middle';
             
@@ -315,55 +554,43 @@ function startTimer() {
     }, 1000);
 }
 
-function checkTrapBlocksUsed() {
-    // Check if any trap block has been moved significantly from its initial position
-    const moveThreshold = 50; // pixels
-    
-    return trapBlocks.some(block => {
-        const distanceX = Math.abs(block.position.x - block.initialPosition.x);
-        const distanceY = Math.abs(block.position.y - block.initialPosition.y);
-        return distanceX > moveThreshold || distanceY > moveThreshold;
-    });
-}
 
 function triggerChaosExplosion() {
-    // Create explosive forces on all trap blocks that have been moved
+    // Create explosive forces on ALL trap blocks (50% more powerful than before)
     trapBlocks.forEach(block => {
-        const distanceX = Math.abs(block.position.x - block.initialPosition.x);
-        const distanceY = Math.abs(block.position.y - block.initialPosition.y);
+        // Visual feedback: make trap block flash red
+        block.render.fillStyle = '#FF0000';
         
-        if (distanceX > 50 || distanceY > 50) {
-            // Apply random explosive force
-            const explosionForce = 0.3;
-            const randomX = (Math.random() - 0.5) * explosionForce;
-            const randomY = (Math.random() - 0.5) * explosionForce;
-            
-            Body.applyForce(block, block.position, {
-                x: randomX,
-                y: randomY
-            });
-            
-            // Also affect nearby blocks
-            blocks.forEach(otherBlock => {
-                if (otherBlock !== block) {
-                    const distance = Math.sqrt(
-                        Math.pow(block.position.x - otherBlock.position.x, 2) +
-                        Math.pow(block.position.y - otherBlock.position.y, 2)
-                    );
+        // Apply explosive force to the trap block itself (15% less than 0.1)
+        const explosionForce = 0.085; // Reduced from 0.1 to 0.085 (15% less powerful)
+        const randomX = (Math.random() - 0.5) * explosionForce;
+        const randomY = (Math.random() - 0.5) * explosionForce;
+        
+        Body.applyForce(block, block.position, {
+            x: randomX,
+            y: randomY
+        });
+        
+        // Also affect nearby blocks with 50% more force
+        blocks.forEach(otherBlock => {
+            if (otherBlock !== block) {
+                const distance = Math.sqrt(
+                    Math.pow(block.position.x - otherBlock.position.x, 2) +
+                    Math.pow(block.position.y - otherBlock.position.y, 2)
+                );
+                
+                if (distance < 100) { // Smaller radius for more localized effect
+                    const forceMultiplier = (100 - distance) / 100 * 0.051; // 15% less force (0.06 -> 0.051)
+                    const directionX = (otherBlock.position.x - block.position.x) / distance;
+                    const directionY = (otherBlock.position.y - block.position.y) / distance;
                     
-                    if (distance < 200) { // Within explosion radius
-                        const forceMultiplier = (200 - distance) / 200 * 0.2;
-                        const directionX = (otherBlock.position.x - block.position.x) / distance;
-                        const directionY = (otherBlock.position.y - block.position.y) / distance;
-                        
-                        Body.applyForce(otherBlock, otherBlock.position, {
-                            x: directionX * forceMultiplier,
-                            y: directionY * forceMultiplier
-                        });
-                    }
+                    Body.applyForce(otherBlock, otherBlock.position, {
+                        x: directionX * forceMultiplier,
+                        y: directionY * forceMultiplier - 0.017 // 15% less upward force (0.02 -> 0.017)
+                    });
                 }
-            });
-        }
+            }
+        });
     });
 }
 
@@ -371,21 +598,13 @@ function endGame() {
     gameActive = false;
     clearInterval(timerInterval);
     
-    // Check if trap blocks were used and trigger chaos if so
-    const trapBlocksUsed = checkTrapBlocksUsed();
+    // Always trigger explosion of all fake blocks when game ends
+    triggerChaosExplosion();
     
-    if (trapBlocksUsed) {
-        // Trigger chaos explosion
-        triggerChaosExplosion();
-        
-        // Wait a moment for chaos to settle before calculating height
-        setTimeout(() => {
-            calculateAndShowResults();
-        }, 2000); // 2 second delay for chaos
-    } else {
-        // No trap blocks used, calculate immediately
+    // Wait a moment for chaos to settle before calculating height
+    setTimeout(() => {
         calculateAndShowResults();
-    }
+    }, 2000); // 2 second delay for chaos
 }
 
 function calculateAndShowResults() {
@@ -402,17 +621,43 @@ function calculateAndShowResults() {
 }
 
 function calculateTowerHeight() {
-    const platformTop = platform.position.y - 10; // Platform surface
-    let highestPoint = platformTop;
+    const platformX = window.innerWidth / 2;
+    const platformWidth = getPlatformWidth();
+    const platformY = window.innerHeight - 80;
+    const groundLevel = platformY;
+    
+    // Only consider blocks that are:
+    // 1. Within platform boundaries (with some tolerance)
+    // 2. Have low velocity (indicating they've settled)
+    // 3. Are on or above the platform level
+    let maxHeight = groundLevel; // Start from platform level
     
     blocks.forEach(block => {
-        const blockTop = block.bounds.min.y;
-        if (blockTop < highestPoint) {
-            highestPoint = blockTop;
+        // Check if block is within platform horizontal boundaries (with tolerance)
+        const blockX = block.position.x;
+        const platformLeft = platformX - (platformWidth / 2) - 50; // Add 50px tolerance
+        const platformRight = platformX + (platformWidth / 2) + 50; // Add 50px tolerance
+        
+        if (blockX >= platformLeft && blockX <= platformRight) {
+            // Check if block has settled (low velocity)
+            const velocity = Math.sqrt(block.velocity.x * block.velocity.x + block.velocity.y * block.velocity.y);
+            const angularVelocity = Math.abs(block.angularVelocity);
+            
+            // Only count blocks that have settled (low velocity)
+            if (velocity < 2 && angularVelocity < 0.1) {
+                // Check if block is on or above platform level
+                const blockTop = block.bounds.min.y;
+                if (blockTop <= groundLevel && blockTop < maxHeight) {
+                    maxHeight = blockTop;
+                }
+            }
         }
     });
     
-    return Math.max(0, Math.round(platformTop - highestPoint));
+    // Convert to score - higher towers get more points
+    const towerHeight = Math.max(0, groundLevel - maxHeight);
+    
+    return Math.round(towerHeight);
 }
 
 async function saveScore(name, score) {
@@ -450,4 +695,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('world');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    
+    // Load factory image and grass image
+    loadFactoryImage();
+    loadGrassImage();
 });
