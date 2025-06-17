@@ -30,53 +30,68 @@ const scoreDisplay = document.getElementById('scoreDisplay');
 const resultDiv = document.getElementById('result');
 const finalScore = document.getElementById('finalScore');
 const gameGrid = document.getElementById('game-grid');
+const instructionOverlay = document.getElementById('instruction-overlay');
+const startGameBtn = document.getElementById('start-game-btn');
 
-// Team types configuration - same as original game
+// Background gradient colors for buttons
+const backgroundColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7'];
+
+// Team types configuration - using background colors for correct teams
 const teamTypes = [
     {
         name: 'Plattform',
-        color: '#9FC5E8',
+        color: '#ff6b6b',
         isTrap: false
     },
     {
         name: 'Verdistrøm',
-        color: '#F8D568',
+        color: '#4ecdc4',
         isTrap: false
     },
     {
         name: 'Enabling',
-        color: '#D5A6BD',
+        color: '#45b7d1',
         isTrap: false
     },
     {
         name: 'Subsystem',
-        color: '#F6B26B',
+        color: '#f9ca24',
         isTrap: false
     },
     {
         name: 'Database',
-        color: '#cccccc',
+        color: '', // Will be randomized
         isTrap: true
     },
     {
         name: 'Portefølje',
-        color: '#b6d7a8',
+        color: '', // Will be randomized
         isTrap: true
     },
     {
         name: 'Support',
-        color: '#ff9999',
+        color: '', // Will be randomized
         isTrap: true
     },
     {
         name: 'Smidig',
-        color: '#c9daf8',
+        color: '', // Will be randomized
         isTrap: true
     },
     {
         name: 'Test',
-        color: '#000000',
+        color: '', // Will be randomized
         textColor: '#ffffff',
+        isTrap: true
+    },
+    {
+        name: 'Juridisk',
+        color: '', // Will be randomized
+        isTrap: true
+    },
+    {
+        name: 'Ledelse',
+        color: '', // Will be randomized
         isTrap: true
     }
 ];
@@ -107,6 +122,16 @@ function createGrid() {
     randomizeButtons();
 }
 
+// Function to get random color for trap teams
+function getRandomColor() {
+    const colors = [
+        '#ffb3ba', '#bae1ff', '#baffc9', '#ffffba', '#ffdfba',
+        '#c9a9dd', '#ff9999', '#cccccc', '#d4e6f1', '#f8c471',
+        '#a9dfbf', '#f7dc6f', '#bb8fce', '#85c1e9', '#f8d7da'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
 // Randomize button contents
 function randomizeButtons() {
     const buttons = document.querySelectorAll('.grid-button');
@@ -115,13 +140,43 @@ function randomizeButtons() {
     buttons.forEach(button => {
         const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
         button.textContent = randomTeam.name;
-        button.style.backgroundColor = randomTeam.color;
+        
+        // Assign colors: use defined color for correct teams, random for trap teams
+        const buttonColor = randomTeam.isTrap ? getRandomColor() : randomTeam.color;
+        button.style.backgroundColor = buttonColor;
         button.style.color = randomTeam.textColor || '#000';
         button.dataset.teamName = randomTeam.name;
         button.dataset.isTrap = randomTeam.isTrap;
         button.disabled = false;
         button.classList.remove('clicked');
     });
+}
+
+// Function to flash screen
+function flashScreen(color) {
+    const flash = document.createElement('div');
+    flash.style.position = 'fixed';
+    flash.style.top = '0';
+    flash.style.left = '0';
+    flash.style.width = '100%';
+    flash.style.height = '100%';
+    flash.style.backgroundColor = color;
+    flash.style.opacity = '0.5';
+    flash.style.zIndex = '9999';
+    flash.style.pointerEvents = 'none';
+    flash.style.transition = 'opacity 0.3s ease';
+    
+    document.body.appendChild(flash);
+    
+    // Fade out the flash
+    setTimeout(() => {
+        flash.style.opacity = '0';
+        setTimeout(() => {
+            if (flash.parentNode) {
+                flash.parentNode.removeChild(flash);
+            }
+        }, 300);
+    }, 200);
 }
 
 // Handle button click
@@ -141,10 +196,12 @@ function handleButtonClick(event) {
     button.disabled = true;
     button.classList.add('clicked');
     
-    // Update score
+    // Flash screen based on correct/wrong answer
     if (isTrap) {
+        flashScreen('#ff0000'); // Red for wrong
         score -= 5;
     } else {
+        flashScreen('#00ff00'); // Green for correct
         score += 5;
     }
     
@@ -171,9 +228,10 @@ function startNewRound() {
 }
 
 // Event listeners
-startBtn.addEventListener('click', startGame);
+startBtn.addEventListener('click', showInstructions);
+startGameBtn.addEventListener('click', startGame);
 
-function startGame() {
+function showInstructions() {
     const playerName = nameInput.value.trim();
     if (!playerName) {
         alert('Vennligst skriv inn ditt navn');
@@ -185,6 +243,20 @@ function startGame() {
         alert('Du kan bare spille én gang!');
         return;
     }
+    
+    // Show instruction overlay
+    instructionOverlay.style.display = 'flex';
+}
+
+function startGame() {
+    const playerName = nameInput.value.trim();
+    if (!playerName) {
+        alert('Vennligst skriv inn ditt navn');
+        return;
+    }
+    
+    // Hide instruction overlay
+    instructionOverlay.style.display = 'none';
     
     startBtn.disabled = true;
     nameInput.disabled = true;
@@ -279,6 +351,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set initial display
     timeDisplay.textContent = '30';
     scoreDisplay.textContent = '0';
+    
+    // Hide instruction overlay initially
+    instructionOverlay.style.display = 'none';
     
     // Create initial grid for preview (disabled)
     createGrid();

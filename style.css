@@ -284,6 +284,7 @@ button:disabled {
         justify-content: center;
         gap: 15px;
         flex-wrap: wrap;
+        font-size: 18px; /* Larger score on mobile */
     }
     
     .results-link {
@@ -326,7 +327,7 @@ button:disabled {
     .game-info {
         flex-direction: row;
         gap: 8px;
-        font-size: 12px;
+        font-size: 16px; /* Still larger than before */
     }
     
     #nameInput {
@@ -341,4 +342,55 @@ button:disabled {
     button, #nameInput {
         min-height: 44px; /* iOS recommended touch target size */
     }
+}
+
+/* Instruction overlay */
+#instruction-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.instruction-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.instruction-content h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.instruction-content p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+#start-game-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#start-game-btn:hover {
+    background-color: #45a049;
 }
