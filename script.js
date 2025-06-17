@@ -49,7 +49,7 @@ const teamTypes = [
         isTrap: false
     },
     {
-        name: 'Enabling',
+        name: 'Tilrettelegging',
         color: '#45b7d1',
         isTrap: false
     },
