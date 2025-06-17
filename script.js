@@ -36,6 +36,9 @@ const startGameBtn = document.getElementById('start-game-btn');
 // Background gradient colors for buttons
 const backgroundColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7'];
 
+// Random colors for trap teams (different from correct team colors)
+const trapColors = ['#ff9999', '#99ccff', '#ffcc99', '#cc99ff', '#99ffcc', '#ffff99', '#ff99cc', '#99ffff', '#ccff99'];
+
 // Team types configuration - using specific colors for correct teams
 const teamTypes = [
     {
@@ -60,37 +63,37 @@ const teamTypes = [
     },
     {
         name: 'Database',
-        color: '#d0d0d0', // Fixed gray color for trap teams
+        color: null, // Will be assigned randomly
         isTrap: true
     },
     {
         name: 'Portefølje',
-        color: '#d0d0d0', // Fixed gray color for trap teams
+        color: null, // Will be assigned randomly
         isTrap: true
     },
     {
         name: 'Support',
-        color: '#d0d0d0', // Fixed gray color for trap teams
+        color: null, // Will be assigned randomly
         isTrap: true
     },
     {
         name: 'Smidig',
-        color: '#d0d0d0', // Fixed gray color for trap teams
+        color: null, // Will be assigned randomly
         isTrap: true
     },
     {
         name: 'Test',
-        color: '#d0d0d0', // Fixed gray color for trap teams
+        color: null, // Will be assigned randomly
         isTrap: true
     },
     {
         name: 'Juridisk',
-        color: '#d0d0d0', // Fixed gray color for trap teams
+        color: null, // Will be assigned randomly
         isTrap: true
     },
     {
         name: 'Ledelse',
-        color: '#d0d0d0', // Fixed gray color for trap teams
+        color: null, // Will be assigned randomly
         isTrap: true
     }
 ];
@@ -130,8 +133,17 @@ function randomizeButtons() {
         const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
         button.textContent = randomTeam.name;
         
-        // Use the defined color for each team (no more random colors)
-        button.style.background = randomTeam.color;
+        // Assign colors: fixed colors for correct teams, random colors for trap teams
+        let buttonColor;
+        if (randomTeam.isTrap) {
+            // Assign random color from trapColors array
+            buttonColor = trapColors[Math.floor(Math.random() * trapColors.length)];
+        } else {
+            // Use the defined color for correct teams
+            buttonColor = randomTeam.color;
+        }
+        
+        button.style.background = buttonColor;
         button.style.color = '#000'; // Always use black text for readability
         button.dataset.teamName = randomTeam.name;
         button.dataset.isTrap = randomTeam.isTrap;
@@ -162,12 +174,16 @@ function handleButtonClick(event) {
     const teamName = button.dataset.teamName;
     const isTrap = button.dataset.isTrap === 'true';
     
-    // Check if this team type was already clicked this round
-    if (clickedTeamsThisRound.has(teamName)) {
-        return; // Can't click same team type twice in one round
+    // Only prevent multiple clicks for correct teams (not trap teams)
+    if (!isTrap && clickedTeamsThisRound.has(teamName)) {
+        return; // Can't click same correct team type twice in one round
     }
     
-    clickedTeamsThisRound.add(teamName);
+    // Add to clicked teams only if it's a correct team
+    if (!isTrap) {
+        clickedTeamsThisRound.add(teamName);
+    }
+    
     button.disabled = true;
     button.classList.add('clicked');
     
