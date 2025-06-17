@@ -81,7 +81,6 @@ const teamTypes = [
     {
         name: 'Test',
         color: '', // Will be randomized
-        textColor: '#ffffff',
         isTrap: true
     },
     {
@@ -143,8 +142,8 @@ function randomizeButtons() {
         
         // Assign colors: use defined color for correct teams, random for trap teams
         const buttonColor = randomTeam.isTrap ? getRandomColor() : randomTeam.color;
-        button.style.backgroundColor = buttonColor;
-        button.style.color = randomTeam.textColor || '#000';
+        button.style.background = buttonColor; // Use background instead of backgroundColor to override CSS gradient
+        button.style.color = '#000'; // Always use black text for readability
         button.dataset.teamName = randomTeam.name;
         button.dataset.isTrap = randomTeam.isTrap;
         button.disabled = false;
@@ -152,30 +151,17 @@ function randomizeButtons() {
     });
 }
 
-// Function to flash screen
-function flashScreen(color) {
-    const flash = document.createElement('div');
-    flash.style.position = 'fixed';
-    flash.style.top = '0';
-    flash.style.left = '0';
-    flash.style.width = '100%';
-    flash.style.height = '100%';
-    flash.style.backgroundColor = color;
-    flash.style.opacity = '0.5';
-    flash.style.zIndex = '9999';
-    flash.style.pointerEvents = 'none';
-    flash.style.transition = 'opacity 0.3s ease';
+// Function to flash button
+function flashButton(button, color) {
+    const originalBackground = button.style.background;
     
-    document.body.appendChild(flash);
+    // Flash the button
+    button.style.background = color;
+    button.style.transition = 'background 0.1s ease';
     
-    // Fade out the flash
     setTimeout(() => {
-        flash.style.opacity = '0';
-        setTimeout(() => {
-            if (flash.parentNode) {
-                flash.parentNode.removeChild(flash);
-            }
-        }, 300);
+        button.style.background = originalBackground;
+        button.style.transition = 'all 0.3s ease'; // Restore original transition
     }, 200);
 }
 
@@ -196,12 +182,12 @@ function handleButtonClick(event) {
     button.disabled = true;
     button.classList.add('clicked');
     
-    // Flash screen based on correct/wrong answer
+    // Flash button based on correct/wrong answer
     if (isTrap) {
-        flashScreen('#ff0000'); // Red for wrong
+        flashButton(button, '#ff0000'); // Red for wrong
         score -= 5;
     } else {
-        flashScreen('#00ff00'); // Green for correct
+        flashButton(button, '#00ff00'); // Green for correct
         score += 5;
     }
     
