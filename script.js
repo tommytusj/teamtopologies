@@ -94,6 +94,7 @@ function markAsPlayed() {
 // Create the 4x6 button grid
 function createGrid() {
     gameGrid.innerHTML = '';
+    gameGrid.style.display = 'grid'; // Make sure it's visible
     
     for (let i = 0; i < 24; i++) {
         const button = document.createElement('button');
@@ -202,6 +203,14 @@ function initGame() {
     
     createGrid();
     
+    // Enable all buttons and reset their appearance
+    const buttons = document.querySelectorAll('.grid-button');
+    buttons.forEach(button => {
+        button.disabled = false;
+        button.style.opacity = '1';
+        button.classList.remove('clicked');
+    });
+    
     // Start round rotation every 3 seconds
     roundInterval = setInterval(startNewRound, 3000);
 }
@@ -270,6 +279,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set initial display
     timeDisplay.textContent = '30';
     scoreDisplay.textContent = '0';
+    
+    // Create initial grid for preview (disabled)
+    createGrid();
+    const buttons = document.querySelectorAll('.grid-button');
+    buttons.forEach(button => {
+        button.disabled = true;
+        button.style.opacity = '0.5';
+    });
     
     // Check if already played and disable if needed
     if (checkPlayedBefore()) {
