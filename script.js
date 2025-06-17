@@ -36,61 +36,61 @@ const startGameBtn = document.getElementById('start-game-btn');
 // Background gradient colors for buttons
 const backgroundColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7'];
 
-// Team types configuration - using background colors for correct teams
+// Team types configuration - using specific colors for correct teams
 const teamTypes = [
     {
         name: 'Plattform',
-        color: '#ff6b6b',
+        color: '#7ecdeb',
         isTrap: false
     },
     {
         name: 'Verdistrøm',
-        color: '#4ecdc4',
+        color: '#ffe090',
         isTrap: false
     },
     {
         name: 'Tilrettelegging',
-        color: '#45b7d1',
+        color: '#ba95cb',
         isTrap: false
     },
     {
         name: 'Subsystem',
-        color: '#f9ca24',
+        color: '#ffc08a',
         isTrap: false
     },
     {
         name: 'Database',
-        color: '', // Will be randomized
+        color: '#d0d0d0', // Fixed gray color for trap teams
         isTrap: true
     },
     {
         name: 'Portefølje',
-        color: '', // Will be randomized
+        color: '#d0d0d0', // Fixed gray color for trap teams
         isTrap: true
     },
     {
         name: 'Support',
-        color: '', // Will be randomized
+        color: '#d0d0d0', // Fixed gray color for trap teams
         isTrap: true
     },
     {
         name: 'Smidig',
-        color: '', // Will be randomized
+        color: '#d0d0d0', // Fixed gray color for trap teams
         isTrap: true
     },
     {
         name: 'Test',
-        color: '', // Will be randomized
+        color: '#d0d0d0', // Fixed gray color for trap teams
         isTrap: true
     },
     {
         name: 'Juridisk',
-        color: '', // Will be randomized
+        color: '#d0d0d0', // Fixed gray color for trap teams
         isTrap: true
     },
     {
         name: 'Ledelse',
-        color: '', // Will be randomized
+        color: '#d0d0d0', // Fixed gray color for trap teams
         isTrap: true
     }
 ];
@@ -121,16 +121,6 @@ function createGrid() {
     randomizeButtons();
 }
 
-// Function to get random color for trap teams
-function getRandomColor() {
-    const colors = [
-        '#ffb3ba', '#bae1ff', '#baffc9', '#ffffba', '#ffdfba',
-        '#c9a9dd', '#ff9999', '#cccccc', '#d4e6f1', '#f8c471',
-        '#a9dfbf', '#f7dc6f', '#bb8fce', '#85c1e9', '#f8d7da'
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
-}
-
 // Randomize button contents
 function randomizeButtons() {
     const buttons = document.querySelectorAll('.grid-button');
@@ -140,9 +130,8 @@ function randomizeButtons() {
         const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
         button.textContent = randomTeam.name;
         
-        // Assign colors: use defined color for correct teams, random for trap teams
-        const buttonColor = randomTeam.isTrap ? getRandomColor() : randomTeam.color;
-        button.style.background = buttonColor; // Use background instead of backgroundColor to override CSS gradient
+        // Use the defined color for each team (no more random colors)
+        button.style.background = randomTeam.color;
         button.style.color = '#000'; // Always use black text for readability
         button.dataset.teamName = randomTeam.name;
         button.dataset.isTrap = randomTeam.isTrap;
