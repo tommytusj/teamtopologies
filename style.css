@@ -252,7 +252,7 @@ button:disabled {
     }
     
     .grid-button {
-        font-size: 12px;
+        font-size: 16px;
         border-radius: 8px;
     }
     
@@ -314,7 +314,7 @@ button:disabled {
     }
     
     .grid-button {
-        font-size: 10px;
+        font-size: 14px;
         border-radius: 6px;
     }
     
