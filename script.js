@@ -148,9 +148,6 @@ function randomizeButtons() {
         // Schedule this button to update after the delay
         updateButtonWithDelay(button, delay * 1000); // Convert to milliseconds
     });
-    
-    // Clear clicked buttons tracking after all updates are scheduled
-    clickedButtonsThisRound.clear();
 }
 
 // Update individual button with delay and transition
@@ -181,6 +178,9 @@ function updateButtonWithDelay(button, delay) {
             button.disabled = false;
             button.classList.remove('clicked');
             button.classList.remove('hidden'); // Show button with new content
+            
+            // Remove this button from clicked tracking so it can be clicked again
+            clickedButtonsThisRound.delete(button.dataset.index);
         }, 500); // 500ms hiding period
     }, delay);
 }
