@@ -22,8 +22,8 @@ body {
 
 #game-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(8, 1fr);
     gap: 10px;
     position: fixed;
     top: 50%;
@@ -252,7 +252,7 @@ button:disabled {
     }
     
     .grid-button {
-        font-size: 12px;
+        font-size: 16px;
         border-radius: 8px;
     }
     
@@ -314,7 +314,7 @@ button:disabled {
     }
     
     .grid-button {
-        font-size: 10px;
+        font-size: 14px;
         border-radius: 6px;
     }
     

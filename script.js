@@ -20,6 +20,7 @@ let score = 0;
 let currentRound = 0;
 let roundInterval;
 let clickedTeamsThisRound = new Set();
+let clickedButtonsThisRound = new Set(); // Track individual button clicks
 let hasPlayedBefore = false;
 
 // UI elements
@@ -108,7 +109,7 @@ function markAsPlayed() {
     localStorage.setItem('teamTopologiesPlayed', 'true');
 }
 
-// Create the 4x6 button grid
+// Create the 3x8 button grid
 function createGrid() {
     gameGrid.innerHTML = '';
     gameGrid.style.display = 'grid'; // Make sure it's visible
@@ -128,6 +129,7 @@ function createGrid() {
 function randomizeButtons() {
     const buttons = document.querySelectorAll('.grid-button');
     clickedTeamsThisRound.clear();
+    clickedButtonsThisRound.clear(); // Clear individual button tracking
     
     buttons.forEach(button => {
         const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
@@ -173,16 +175,15 @@ function handleButtonClick(event) {
     const button = event.target;
     const teamName = button.dataset.teamName;
     const isTrap = button.dataset.isTrap === 'true';
+    const buttonIndex = button.dataset.index;
     
-    // Only prevent multiple clicks for correct teams (not trap teams)
-    if (!isTrap && clickedTeamsThisRound.has(teamName)) {
-        return; // Can't click same correct team type twice in one round
+    // Prevent clicking the same individual button twice before labels change
+    if (clickedButtonsThisRound.has(buttonIndex)) {
+        return; // Can't click same button twice in one round
     }
     
-    // Add to clicked teams only if it's a correct team
-    if (!isTrap) {
-        clickedTeamsThisRound.add(teamName);
-    }
+    // Track this individual button as clicked
+    clickedButtonsThisRound.add(buttonIndex);
     
     button.disabled = true;
     button.classList.add('clicked');
@@ -261,6 +262,7 @@ function initGame() {
     score = 0;
     currentRound = 0;
     clickedTeamsThisRound.clear();
+    clickedButtonsThisRound.clear(); // Clear individual button tracking
     scoreDisplay.textContent = '0';
     gameActive = true;
     
