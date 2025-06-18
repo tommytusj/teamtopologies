@@ -327,7 +327,7 @@ async function saveScore(name, score) {
     try {
         const { data, error } = await supabaseClient
             .from('resultater')
-            .insert([{ navn: name, score: score }]);
+            .insert([{ name: name, score: score }]);
         
         if (error) {
             console.error('Error saving score:', error);
