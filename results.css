@@ -4,6 +4,8 @@
     min-height: 100vh;
     padding: 20px;
     font-family: Arial, sans-serif;
+    overflow: auto; /* Override the body overflow: hidden from style.css */
+    height: auto; /* Override the body height: 100vh from style.css */
 }
 
 .results-container {

@@ -20,7 +20,7 @@ Et nettleserbasert fysikkspill inspirert av Team Topologies og Jenga. Spilleren 
 
 ### Normale team-blokker
 - **Plattform-team**: Brede, lave blokker (160×40px) i blå farge
-- **Stream-aligned team (Verdistrøm)**: Firkantede blokker (80×80px) i gul farge  
+- **Stream-aligned team (Produkt)**: Firkantede blokker (80×80px) i gul farge  
 - **Enabling team**: Høye, smale blokker (80×120px) i rosa farge
 - **Complicated Subsystem team**: Små firkanter (60×60px) i oransje farge
 
