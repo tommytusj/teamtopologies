@@ -213,10 +213,13 @@ function handleButtonClick(event) {
         }
     }, 1000);
     
-    // Hide the button after feedback animation
+    // Hide the button immediately
+    button.classList.add('hidden');
+    
+    // Fade the button back in after 500ms (but keep it disabled)
     setTimeout(() => {
-        button.classList.add('hidden');
-    }, 1000);
+        button.classList.remove('hidden');
+    }, 500);
 }
 
 // Start new round (randomize buttons)
