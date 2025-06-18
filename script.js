@@ -125,34 +125,64 @@ function createGrid() {
     randomizeButtons();
 }
 
-// Randomize button contents
+// Randomize button contents with staggered timing
 function randomizeButtons() {
     const buttons = document.querySelectorAll('.grid-button');
     clickedTeamsThisRound.clear();
-    clickedButtonsThisRound.clear(); // Clear individual button tracking
+    
+    // Store which buttons were clicked for this round before we clear the tracking
+    const clickedButtons = new Set(clickedButtonsThisRound);
     
     buttons.forEach(button => {
-        const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
-        button.textContent = randomTeam.name;
+        const buttonIndex = button.dataset.index;
+        const wasClicked = clickedButtons.has(buttonIndex);
         
-        // Assign colors: fixed colors for correct teams, random colors for trap teams
-        let buttonColor;
-        if (randomTeam.isTrap) {
-            // Assign random color from trapColors array
-            buttonColor = trapColors[Math.floor(Math.random() * trapColors.length)];
-        } else {
-            // Use the defined color for correct teams
-            buttonColor = randomTeam.color;
+        // Random delay between 0.1 and 2.0 seconds
+        let delay = Math.random() * 1.9 + 0.1; // 0.1 to 2.0 seconds
+        
+        // Add extra 500ms delay for clicked buttons
+        if (wasClicked) {
+            delay += 0.5;
         }
         
-        button.style.background = buttonColor;
-        button.style.color = '#000'; // Always use black text for readability
-        button.dataset.teamName = randomTeam.name;
-        button.dataset.isTrap = randomTeam.isTrap;
-        button.disabled = false;
-        button.classList.remove('clicked');
-        button.classList.remove('hidden'); // Show all buttons again with new content
+        // Schedule this button to update after the delay
+        updateButtonWithDelay(button, delay * 1000); // Convert to milliseconds
     });
+    
+    // Clear clicked buttons tracking after all updates are scheduled
+    clickedButtonsThisRound.clear();
+}
+
+// Update individual button with delay and transition
+function updateButtonWithDelay(button, delay) {
+    setTimeout(() => {
+        // Hide the button first
+        button.classList.add('hidden');
+        
+        // After 500ms, update content and show button
+        setTimeout(() => {
+            const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
+            button.textContent = randomTeam.name;
+            
+            // Assign colors: fixed colors for correct teams, random colors for trap teams
+            let buttonColor;
+            if (randomTeam.isTrap) {
+                // Assign random color from trapColors array
+                buttonColor = trapColors[Math.floor(Math.random() * trapColors.length)];
+            } else {
+                // Use the defined color for correct teams
+                buttonColor = randomTeam.color;
+            }
+            
+            button.style.background = buttonColor;
+            button.style.color = '#000'; // Always use black text for readability
+            button.dataset.teamName = randomTeam.name;
+            button.dataset.isTrap = randomTeam.isTrap;
+            button.disabled = false;
+            button.classList.remove('clicked');
+            button.classList.remove('hidden'); // Show button with new content
+        }, 500); // 500ms hiding period
+    }, delay);
 }
 
 // Function to flash button
