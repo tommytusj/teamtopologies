@@ -48,7 +48,7 @@ const teamTypes = [
         isTrap: false
     },
     {
-        name: 'Verdistrøm',
+        name: 'Produkt',
         color: '#ffe090',
         isTrap: false
     },
