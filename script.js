@@ -131,27 +131,36 @@ function randomizeButtons() {
     clickedTeamsThisRound.clear();
     clickedButtonsThisRound.clear(); // Clear individual button tracking
     
+    // First, hide all buttons to prevent accidental clicks
     buttons.forEach(button => {
-        const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
-        button.textContent = randomTeam.name;
-        
-        // Assign colors: fixed colors for correct teams, random colors for trap teams
-        let buttonColor;
-        if (randomTeam.isTrap) {
-            // Assign random color from trapColors array
-            buttonColor = trapColors[Math.floor(Math.random() * trapColors.length)];
-        } else {
-            // Use the defined color for correct teams
-            buttonColor = randomTeam.color;
-        }
-        
-        button.style.background = buttonColor;
-        button.style.color = '#000'; // Always use black text for readability
-        button.dataset.teamName = randomTeam.name;
-        button.dataset.isTrap = randomTeam.isTrap;
-        button.disabled = false;
-        button.classList.remove('clicked');
+        button.classList.add('hidden');
     });
+    
+    // Wait 500ms before showing buttons with new content
+    setTimeout(() => {
+        buttons.forEach(button => {
+            const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
+            button.textContent = randomTeam.name;
+            
+            // Assign colors: fixed colors for correct teams, random colors for trap teams
+            let buttonColor;
+            if (randomTeam.isTrap) {
+                // Assign random color from trapColors array
+                buttonColor = trapColors[Math.floor(Math.random() * trapColors.length)];
+            } else {
+                // Use the defined color for correct teams
+                buttonColor = randomTeam.color;
+            }
+            
+            button.style.background = buttonColor;
+            button.style.color = '#000'; // Always use black text for readability
+            button.dataset.teamName = randomTeam.name;
+            button.dataset.isTrap = randomTeam.isTrap;
+            button.disabled = false;
+            button.classList.remove('clicked');
+            button.classList.remove('hidden'); // Show the button again
+        });
+    }, 500);
 }
 
 // Function to flash button
@@ -211,6 +220,11 @@ function handleButtonClick(event) {
             feedback.parentNode.removeChild(feedback);
         }
     }, 1000);
+    
+    // Hide the button after feedback animation
+    setTimeout(() => {
+        button.classList.add('hidden');
+    }, 1000);
 }
 
 // Start new round (randomize buttons)
@@ -227,12 +241,6 @@ function showInstructions() {
     const playerName = nameInput.value.trim();
     if (!playerName) {
         alert('Vennligst skriv inn ditt navn');
-        return;
-    }
-    
-    // Check if already played
-    if (checkPlayedBefore()) {
-        alert('Du kan bare spille én gang!');
         return;
     }
     
@@ -274,6 +282,7 @@ function initGame() {
         button.disabled = false;
         button.style.opacity = '1';
         button.classList.remove('clicked');
+        button.classList.remove('hidden');
     });
     
     // Start round rotation every 3 seconds
@@ -305,14 +314,18 @@ function endGame() {
     });
     
     calculateAndShowResults();
+    
+    // Re-enable the start button and name input for replay
+    setTimeout(() => {
+        startBtn.disabled = false;
+        nameInput.disabled = false;
+        countdown = 30; // Reset countdown for next game
+    }, 1000);
 }
 
 function calculateAndShowResults() {
     finalScore.textContent = score;
     resultDiv.style.display = 'block';
-    
-    // Mark as played
-    markAsPlayed();
     
     // Save score to Supabase
     saveScore(nameInput.value.trim(), score);
@@ -355,11 +368,4 @@ document.addEventListener('DOMContentLoaded', () => {
         button.disabled = true;
         button.style.opacity = '0.5';
     });
-    
-    // Check if already played and disable if needed
-    if (checkPlayedBefore()) {
-        startBtn.textContent = 'Allerede spilt';
-        startBtn.disabled = true;
-        nameInput.disabled = true;
-    }
 });
