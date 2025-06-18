@@ -22,8 +22,8 @@ body {
 
 #game-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(8, 1fr);
     gap: 10px;
     position: fixed;
     top: 50%;
