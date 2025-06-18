@@ -131,36 +131,28 @@ function randomizeButtons() {
     clickedTeamsThisRound.clear();
     clickedButtonsThisRound.clear(); // Clear individual button tracking
     
-    // First, hide all buttons to prevent accidental clicks
     buttons.forEach(button => {
-        button.classList.add('hidden');
+        const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
+        button.textContent = randomTeam.name;
+        
+        // Assign colors: fixed colors for correct teams, random colors for trap teams
+        let buttonColor;
+        if (randomTeam.isTrap) {
+            // Assign random color from trapColors array
+            buttonColor = trapColors[Math.floor(Math.random() * trapColors.length)];
+        } else {
+            // Use the defined color for correct teams
+            buttonColor = randomTeam.color;
+        }
+        
+        button.style.background = buttonColor;
+        button.style.color = '#000'; // Always use black text for readability
+        button.dataset.teamName = randomTeam.name;
+        button.dataset.isTrap = randomTeam.isTrap;
+        button.disabled = false;
+        button.classList.remove('clicked');
+        button.classList.remove('hidden'); // Show all buttons again with new content
     });
-    
-    // Wait 500ms before showing buttons with new content
-    setTimeout(() => {
-        buttons.forEach(button => {
-            const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
-            button.textContent = randomTeam.name;
-            
-            // Assign colors: fixed colors for correct teams, random colors for trap teams
-            let buttonColor;
-            if (randomTeam.isTrap) {
-                // Assign random color from trapColors array
-                buttonColor = trapColors[Math.floor(Math.random() * trapColors.length)];
-            } else {
-                // Use the defined color for correct teams
-                buttonColor = randomTeam.color;
-            }
-            
-            button.style.background = buttonColor;
-            button.style.color = '#000'; // Always use black text for readability
-            button.dataset.teamName = randomTeam.name;
-            button.dataset.isTrap = randomTeam.isTrap;
-            button.disabled = false;
-            button.classList.remove('clicked');
-            button.classList.remove('hidden'); // Show the button again
-        });
-    }, 500);
 }
 
 // Function to flash button
