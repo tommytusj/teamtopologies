@@ -94,6 +94,12 @@ body {
     box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
 }
 
+.grid-button.hidden {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
 .score-feedback {
     position: absolute;
     top: 50%;

@@ -125,33 +125,64 @@ function createGrid() {
     randomizeButtons();
 }
 
-// Randomize button contents
+// Randomize button contents with staggered timing
 function randomizeButtons() {
     const buttons = document.querySelectorAll('.grid-button');
     clickedTeamsThisRound.clear();
-    clickedButtonsThisRound.clear(); // Clear individual button tracking
+    
+    // Store which buttons were clicked for this round before we clear the tracking
+    const clickedButtons = new Set(clickedButtonsThisRound);
     
     buttons.forEach(button => {
-        const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
-        button.textContent = randomTeam.name;
+        const buttonIndex = button.dataset.index;
+        const wasClicked = clickedButtons.has(buttonIndex);
         
-        // Assign colors: fixed colors for correct teams, random colors for trap teams
-        let buttonColor;
-        if (randomTeam.isTrap) {
-            // Assign random color from trapColors array
-            buttonColor = trapColors[Math.floor(Math.random() * trapColors.length)];
-        } else {
-            // Use the defined color for correct teams
-            buttonColor = randomTeam.color;
+        // Random delay between 0.1 and 2.0 seconds
+        let delay = Math.random() * 1.9 + 0.1; // 0.1 to 2.0 seconds
+        
+        // Add extra 500ms delay for clicked buttons
+        if (wasClicked) {
+            delay += 0.5;
         }
         
-        button.style.background = buttonColor;
-        button.style.color = '#000'; // Always use black text for readability
-        button.dataset.teamName = randomTeam.name;
-        button.dataset.isTrap = randomTeam.isTrap;
-        button.disabled = false;
-        button.classList.remove('clicked');
+        // Schedule this button to update after the delay
+        updateButtonWithDelay(button, delay * 1000); // Convert to milliseconds
     });
+}
+
+// Update individual button with delay and transition
+function updateButtonWithDelay(button, delay) {
+    setTimeout(() => {
+        // Hide the button first
+        button.classList.add('hidden');
+        
+        // After 500ms, update content and show button
+        setTimeout(() => {
+            const randomTeam = teamTypes[Math.floor(Math.random() * teamTypes.length)];
+            button.textContent = randomTeam.name;
+            
+            // Assign colors: fixed colors for correct teams, random colors for trap teams
+            let buttonColor;
+            if (randomTeam.isTrap) {
+                // Assign random color from trapColors array
+                buttonColor = trapColors[Math.floor(Math.random() * trapColors.length)];
+            } else {
+                // Use the defined color for correct teams
+                buttonColor = randomTeam.color;
+            }
+            
+            button.style.background = buttonColor;
+            button.style.color = '#000'; // Always use black text for readability
+            button.dataset.teamName = randomTeam.name;
+            button.dataset.isTrap = randomTeam.isTrap;
+            button.disabled = false;
+            button.classList.remove('clicked');
+            button.classList.remove('hidden'); // Show button with new content
+            
+            // Remove this button from clicked tracking so it can be clicked again
+            clickedButtonsThisRound.delete(button.dataset.index);
+        }, 500); // 500ms hiding period
+    }, delay);
 }
 
 // Function to flash button
@@ -211,6 +242,14 @@ function handleButtonClick(event) {
             feedback.parentNode.removeChild(feedback);
         }
     }, 1000);
+    
+    // Hide the button immediately
+    button.classList.add('hidden');
+    
+    // Fade the button back in after 500ms (but keep it disabled)
+    setTimeout(() => {
+        button.classList.remove('hidden');
+    }, 500);
 }
 
 // Start new round (randomize buttons)
@@ -227,12 +266,6 @@ function showInstructions() {
     const playerName = nameInput.value.trim();
     if (!playerName) {
         alert('Vennligst skriv inn ditt navn');
-        return;
-    }
-    
-    // Check if already played
-    if (checkPlayedBefore()) {
-        alert('Du kan bare spille én gang!');
         return;
     }
     
@@ -274,6 +307,7 @@ function initGame() {
         button.disabled = false;
         button.style.opacity = '1';
         button.classList.remove('clicked');
+        button.classList.remove('hidden');
     });
     
     // Start round rotation every 3 seconds
@@ -305,14 +339,18 @@ function endGame() {
     });
     
     calculateAndShowResults();
+    
+    // Re-enable the start button and name input for replay
+    setTimeout(() => {
+        startBtn.disabled = false;
+        nameInput.disabled = false;
+        countdown = 30; // Reset countdown for next game
+    }, 1000);
 }
 
 function calculateAndShowResults() {
     finalScore.textContent = score;
     resultDiv.style.display = 'block';
-    
-    // Mark as played
-    markAsPlayed();
     
     // Save score to Supabase
     saveScore(nameInput.value.trim(), score);
@@ -355,11 +393,4 @@ document.addEventListener('DOMContentLoaded', () => {
         button.disabled = true;
         button.style.opacity = '0.5';
     });
-    
-    // Check if already played and disable if needed
-    if (checkPlayedBefore()) {
-        startBtn.textContent = 'Allerede spilt';
-        startBtn.disabled = true;
-        nameInput.disabled = true;
-    }
 });
